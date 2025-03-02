@@ -33,6 +33,14 @@ app.get('/found', (req, res) => {
   res.sendFile(path.join(__dirname, '../found.html'));
 });
 
+app.get('/tag-management', (req, res) => {
+  res.sendFile(path.join(__dirname, '../tag-management.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '../dashboard.html'));
+});
+
 // MongoDB接続（オプション）
 let dbConnected = false;
 
