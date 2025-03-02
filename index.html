@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>おかえりNFC - 落とし物発見サービス</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="bg-primary-custom">
+        <div class="container py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="index.html" class="text-white text-decoration-none">
+                    <h1 class="h4 mb-0"><i class="fas fa-home me-2"></i>おかえりNFC</h1>
+                </a>
+                <div>
+                    <button class="btn btn-outline-light btn-sm">ログイン</button>
+                    <button class="btn btn-light btn-sm ms-2">新規登録</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero bg-light py-5">
+            <div class="container text-center">
+                <h2 class="display-5 mb-4">大切なものを<br>安心して持ち歩こう</h2>
+                <p class="lead mb-4">NFCタグで簡単に落とし物を持ち主に返却</p>
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="#how-it-works" class="btn btn-primary btn-lg px-4 me-md-2">サービスの使い方</a>
+                    <a href="#register" class="btn btn-outline-primary btn-lg px-4">今すぐ登録する</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="how-it-works" class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-5">サービスの使い方</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-primary-light rounded-circle mb-3 mx-auto">
+                                    <i class="fas fa-tag text-primary"></i>
+                                </div>
+                                <h3 class="h5">1. NFCタグを購入・登録</h3>
+                                <p class="text-muted">専用のNFCタグを購入し、アカウントに登録します。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-primary-light rounded-circle mb-3 mx-auto">
+                                    <i class="fas fa-mobile-alt text-primary"></i>
+                                </div>
+                                <h3 class="h5">2. 持ち物に貼り付け</h3>
+                                <p class="text-muted">NFCタグを大切な持ち物に貼り付けるだけで準備完了です。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon bg-primary-light rounded-circle mb-3 mx-auto">
+                                    <i class="fas fa-map-marker-alt text-primary"></i>
+                                </div>
+                                <h3 class="h5">3. 落とし物が見つかったら</h3>
+                                <p class="text-muted">発見者がNFCタグをスキャンすると、あなたに通知が届きます。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="register" class="py-5 bg-light">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <h2 class="mb-3">今すぐ始めましょう</h2>
+                        <p class="lead mb-4">大切な持ち物を守るための第一歩。簡単な登録で安心をお届けします。</p>
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>初期費用は専用タグの購入のみ</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>月額料金なし</li>
+                            <li class="mb-2"><i class="fas fa-check text-success me-2"></i>複数の持ち物に使用可能</li>
+                        </ul>
+                        <a href="#" class="btn btn-primary btn-lg">無料で登録する</a>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow">
+                            <div class="card-body p-4">
+                                <h3 class="h4 mb-4">新規アカウント登録</h3>
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="name" class="form-label">お名前</label>
+                                        <input type="text" class="form-control" id="name" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">メールアドレス</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">パスワード</label>
+                                        <input type="password" class="form-control" id="password" required>
+                                    </div>
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" class="form-check-input" id="terms" required>
+                                        <label class="form-check-label" for="terms">利用規約に同意します</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">登録する</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-5">
+            <div class="container">
+                <h2 class="text-center mb-5">よくある質問</h2>
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                NFCタグはどこで購入できますか？
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                当サービスの専用NFCタグは、オンラインストアで購入いただけます。また、一般的なNFCタグも使用可能ですが、専用タグの使用をおすすめします。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                発見者はどのようにして持ち主に連絡しますか？
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                発見者がNFCタグをスマートフォンでスキャンすると、専用フォームが表示されます。そこで発見場所などの情報を入力すると、システムを通じて持ち主に通知が届きます。発見者と持ち主の個人情報は保護されます。
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                月額料金はかかりますか？
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                いいえ、月額料金はかかりません。初期費用として専用NFCタグの購入費用のみで、サービスをご利用いただけます。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>おかえりNFC</h5>
+                    <p class="text-muted">NFCタグを活用した落とし物発見サービス</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>リンク</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-decoration-none text-muted">ホーム</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">サービスの使い方</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">よくある質問</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">お問い合わせ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>お問い合わせ</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-envelope me-2"></i>info@okaeri-nfc.jp</li>
+                        <li><i class="fas fa-phone me-2"></i>03-1234-5678</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center text-muted">
+                <small>&copy; 2025 おかえりNFC. All rights reserved.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

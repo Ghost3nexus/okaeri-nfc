@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景の円 -->
+  <circle cx="150" cy="150" r="120" fill="#DCEDC8" opacity="0.6"/>
+  
+  <!-- 人物 -->
+  <g transform="translate(90, 70)">
+    <!-- 頭 -->
+    <circle cx="60" cy="50" r="30" fill="#F5CBA7"/>
+    
+    <!-- 顔 -->
+    <circle cx="50" cy="45" r="3" fill="#333"/>
+    <circle cx="70" cy="45" r="3" fill="#333"/>
+    <path d="M50 65 Q60 70 70 65" stroke="#333" stroke-width="2" fill="none"/>
+    
+    <!-- 帽子 -->
+    <path d="M30 35 Q60 10 90 35" fill="#34495E"/>
+    <ellipse cx="60" cy="35" rx="30" ry="10" fill="#34495E"/>
+    
+    <!-- 体 -->
+    <path d="M60 80 L40 150 L80 150 Z" fill="#27AE60"/>
+    
+    <!-- 腕 -->
+    <path d="M60 90 L20 120" stroke="#27AE60" stroke-width="15" stroke-linecap="round"/>
+    <path d="M60 90 L100 120" stroke="#27AE60" stroke-width="15" stroke-linecap="round"/>
+    
+    <!-- 手 -->
+    <circle cx="20" cy="120" r="8" fill="#F5CBA7"/>
+    <circle cx="100" cy="120" r="8" fill="#F5CBA7"/>
+  </g>
+  
+  <!-- 落とし物（財布） -->
+  <g transform="translate(170, 170)">
+    <rect x="0" y="0" width="40" height="30" rx="5" fill="#8E44AD"/>
+    <rect x="5" y="5" width="30" height="5" fill="#9B59B6"/>
+  </g>
+  
+  <!-- 位置マーカー -->
+  <g transform="translate(130, 130)">
+    <path d="M20 0 A20 20 0 0 1 20 40 A20 20 0 0 1 20 0 Z" fill="#FF9800" opacity="0.8"/>
+    <circle cx="20" cy="15" r="8" fill="white"/>
+  </g>
+</svg>
