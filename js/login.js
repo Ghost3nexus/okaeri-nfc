@@ -33,6 +33,14 @@ document.addEventListener('DOMContentLoaded', function() {
     if (copyServiceUrlBtn) {
         copyServiceUrlBtn.addEventListener('click', copyServiceUrl);
     }
+    
+    // 登録成功モーダルの「ダッシュボードへ」ボタン
+    const dashboardBtn = document.querySelector('#registerSuccessModal .modal-footer .btn-primary');
+    if (dashboardBtn) {
+        dashboardBtn.addEventListener('click', function() {
+            window.location.href = 'dashboard.html';
+        });
+    }
 });
 
 /**
@@ -66,7 +74,7 @@ async function handleLogin(event) {
         localStorage.setItem(CONFIG.STORAGE_USER_KEY, JSON.stringify(response.data.user));
         
         // ダッシュボードにリダイレクト
-        window.location.href = 'index.html';
+        window.location.href = 'dashboard.html';
     } catch (error) {
         // エラーメッセージを表示
         loginErrorMessage.textContent = error.message || 'ログインに失敗しました';
