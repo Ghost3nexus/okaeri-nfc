@@ -3,9 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-const notificationRoutes = require('./routes/notification');
 const userRoutes = require('./routes/user');
-const tagRoutes = require('./routes/tag');
 
 // Express アプリの初期化
 const app = express();
@@ -20,9 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../')));
 
 // APIルートの設定
-app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/tags', tagRoutes);
 
 // フロントエンドへのルーティング
 app.get('/', (req, res) => {
@@ -33,24 +29,8 @@ app.get('/found', (req, res) => {
   res.sendFile(path.join(__dirname, '../found.html'));
 });
 
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, '../dashboard.html'));
-});
-
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, '../login.html'));
-});
-
-app.get('/register-tag', (req, res) => {
-  res.sendFile(path.join(__dirname, '../register-tag.html'));
-});
-
-app.get('/nfc-setup', (req, res) => {
-  res.sendFile(path.join(__dirname, '../nfc-setup.html'));
-});
-
-app.get('/my-tags', (req, res) => {
-  res.sendFile(path.join(__dirname, '../my-tags.html'));
 });
 
 // MongoDB接続（オプション）
@@ -64,37 +44,7 @@ let dbConnected = false;
  */
 const logError = (type, error, message) => {
   const timestamp = new Date().toISOString();
-  const errorLog = {
-    timestamp,
-    type,
-    message,
-    error: error ? error.toString() : null,
-    stack: error && error.stack ? error.stack : null
-  };
-  
-  // コンソールにエラーを出力
   console.error(`[${timestamp}] [${type}] ${message}:`, error);
-  
-  // エラーログをファイルに保存（オプション）
-  if (process.env.LOG_ERRORS === 'true') {
-    const fs = require('fs');
-    const logDir = path.join(__dirname, '../logs');
-    
-    // ログディレクトリが存在しない場合は作成
-    if (!fs.existsSync(logDir)) {
-      fs.mkdirSync(logDir, { recursive: true });
-    }
-    
-    const logFile = path.join(logDir, `error-${new Date().toISOString().split('T')[0]}.log`);
-    fs.appendFileSync(logFile, JSON.stringify(errorLog) + '\n');
-  }
-  
-  // 管理者に通知（オプション）
-  if (process.env.NOTIFY_ADMIN === 'true' && process.env.ADMIN_EMAIL) {
-    // メール通知（実装例）
-    // sendAdminNotification(errorLog);
-    console.log(`管理者通知が有効: ${process.env.ADMIN_EMAIL} に通知が送信されます`);
-  }
 };
 
 try {

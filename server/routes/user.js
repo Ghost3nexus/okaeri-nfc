@@ -3,23 +3,14 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const Tag = require('../models/Tag');
 
 // JWT トークン生成
 const signToken = (id) => {
-  // idが文字列かどうかをチェック（モックユーザーの場合）
-  const payload = typeof id === 'string' ? { id } : { id: id.toString() };
-  
-  const token = jwt.sign(
-    payload,
+  return jwt.sign(
+    { id },
     process.env.JWT_SECRET || 'your-secret-key',
     { expiresIn: process.env.JWT_EXPIRES_IN || '90d' }
   );
-  
-  console.log('Generated Token Payload:', payload);
-  console.log('Generated Token:', token);
-  
-  return token;
 };
 
 // 認証トークンを送信
@@ -39,7 +30,7 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 // ユーザー登録
-router.post('/signup', async (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
     
@@ -59,6 +50,9 @@ router.post('/signup', async (req, res) => {
       password,
       phone
     });
+    
+    // サービスURLを生成
+    const serviceUrl = newUser.generateServiceUrl();
     
     // トークン生成と送信
     createSendToken(newUser, 201, res);
@@ -93,7 +87,7 @@ router.post('/login', async (req, res) => {
           _id: 'mock-user-id-123',
           name: 'デモユーザー',
           email: 'demo@example.com',
-          role: 'user',
+          serviceToken: 'demo123',
           createdAt: new Date()
         };
         
@@ -145,11 +139,8 @@ const protect = async (req, res, next) => {
       });
     }
     
-    console.log('Received Token:', token);
-    
     // トークンの検証
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
-    console.log('Decoded Token:', decoded);
     
     // MongoDBをスキップする場合はモックユーザーを使用
     if (process.env.SKIP_MONGODB === 'true') {
@@ -159,7 +150,7 @@ const protect = async (req, res, next) => {
           _id: 'mock-user-id-123',
           name: 'デモユーザー',
           email: 'demo@example.com',
-          role: 'user',
+          serviceToken: 'demo123',
           createdAt: new Date()
         };
         
@@ -200,14 +191,14 @@ const protect = async (req, res, next) => {
 // 現在のユーザー情報を取得
 router.get('/me', protect, async (req, res) => {
   try {
-    // ユーザーに関連するタグを取得
-    const tags = await Tag.find({ owner: req.user._id });
+    // サービスURLを生成
+    const serviceUrl = req.user.generateServiceUrl();
     
     res.status(200).json({
       success: true,
       data: {
         user: req.user,
-        tags
+        serviceUrl
       }
     });
   } catch (err) {
@@ -220,136 +211,59 @@ router.get('/me', protect, async (req, res) => {
   }
 });
 
-// ユーザー情報の更新
-router.patch('/updateMe', protect, async (req, res) => {
+// 発見者用API - トークンからユーザー情報を取得
+router.get('/found', async (req, res) => {
   try {
-    // パスワード更新は別のルートで処理
-    if (req.body.password) {
+    const { token } = req.query;
+    
+    if (!token) {
       return res.status(400).json({
         success: false,
-        message: 'このルートではパスワードを更新できません。/updateMyPassword を使用してください'
+        message: 'トークンが提供されていません'
       });
     }
     
-    // 更新するフィールドをフィルタリング
-    const filteredBody = {};
-    const allowedFields = ['name', 'email', 'phone', 'address'];
-    Object.keys(req.body).forEach(key => {
-      if (allowedFields.includes(key)) {
-        filteredBody[key] = req.body[key];
+    // MongoDBをスキップする場合はモックデータを使用
+    if (process.env.SKIP_MONGODB === 'true') {
+      if (token === 'demo123') {
+        return res.status(200).json({
+          success: true,
+          data: {
+            name: 'デモユーザー',
+            email: 'demo@example.com'
+          }
+        });
+      } else {
+        return res.status(404).json({
+          success: false,
+          message: '指定されたトークンのユーザーが見つかりません'
+        });
       }
-    });
-    
-    // ユーザー情報を更新
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      filteredBody,
-      { new: true, runValidators: true }
-    );
-    
-    res.status(200).json({
-      success: true,
-      data: {
-        user: updatedUser
-      }
-    });
-  } catch (err) {
-    console.error('ユーザー更新エラー:', err);
-    res.status(500).json({
-      success: false,
-      message: 'ユーザー情報の更新中にエラーが発生しました',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
-  }
-});
-
-// 特定のユーザー情報を更新（IDを指定）
-router.patch('/:id', protect, async (req, res) => {
-  try {
-    // パスワード更新は別のルートで処理
-    if (req.body.password) {
-      return res.status(400).json({
-        success: false,
-        message: 'このルートではパスワードを更新できません'
-      });
     }
     
-    // 更新するフィールドをフィルタリング
-    const filteredBody = {};
-    const allowedFields = ['name', 'email', 'phone', 'address'];
-    Object.keys(req.body).forEach(key => {
-      if (allowedFields.includes(key)) {
-        filteredBody[key] = req.body[key];
-      }
-    });
+    // トークンからユーザーを検索
+    const user = await User.findOne({ serviceToken: token });
     
-    // ユーザーの存在確認
-    const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: '指定されたユーザーが見つかりません'
+        message: '指定されたトークンのユーザーが見つかりません'
       });
     }
     
-    // 自分自身のアカウントのみ更新可能
-    if (req.params.id !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: '他のユーザーの情報を更新する権限がありません'
-      });
-    }
-    
-    // ユーザー情報を更新
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      filteredBody,
-      { new: true, runValidators: true }
-    );
-    
+    // 公開情報のみを返す
     res.status(200).json({
       success: true,
       data: {
-        user: updatedUser
+        name: user.name,
+        email: user.email
       }
     });
   } catch (err) {
-    console.error('ユーザー更新エラー:', err);
+    console.error('ユーザー検索エラー:', err);
     res.status(500).json({
       success: false,
-      message: 'ユーザー情報の更新中にエラーが発生しました',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
-  }
-});
-
-// パスワード更新
-router.patch('/updateMyPassword', protect, async (req, res) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-    
-    // 現在のユーザーを取得（パスワードを含める）
-    const user = await User.findById(req.user._id).select('+password');
-    
-    // 現在のパスワードが正しいか確認
-    if (!(await user.correctPassword(currentPassword, user.password))) {
-      return res.status(401).json({
-        success: false,
-        message: '現在のパスワードが正しくありません'
-      });
-    }
-    
-    // パスワードを更新
-    user.password = newPassword;
-    await user.save();
-    
-    // トークン生成と送信
-    createSendToken(user, 200, res);
-  } catch (err) {
-    console.error('パスワード更新エラー:', err);
-    res.status(500).json({
-      success: false,
-      message: 'パスワードの更新中にエラーが発生しました',
+      message: 'ユーザー情報の検索中にエラーが発生しました',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }

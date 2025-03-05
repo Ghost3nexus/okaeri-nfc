@@ -31,26 +31,19 @@ const userSchema = new mongoose.Schema({
       message: '有効な電話番号を入力してください'
     }
   },
-  address: {
-    type: String,
-    trim: true
-  },
   createdAt: {
     type: Date,
     default: Date.now
   },
-  passwordResetToken: String,
-  passwordResetExpires: Date
-}, {
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
-
-// 仮想フィールド: ユーザーに関連するタグ
-userSchema.virtual('tags', {
-  ref: 'Tag',
-  localField: '_id',
-  foreignField: 'owner'
+  // サービスURL用のトークン
+  serviceToken: {
+    type: String,
+    unique: true,
+    default: function() {
+      // ランダムなサービストークンを生成（8文字）
+      return crypto.randomBytes(4).toString('hex');
+    }
+  }
 });
 
 // パスワードハッシュ化のミドルウェア
@@ -68,18 +61,9 @@ userSchema.methods.correctPassword = async function(candidatePassword, userPassw
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-// パスワードリセットトークン生成メソッド
-userSchema.methods.createPasswordResetToken = function() {
-  const resetToken = crypto.randomBytes(32).toString('hex');
-  
-  this.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
-    
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10分間有効
-  
-  return resetToken;
+// サービスURL生成メソッド
+userSchema.methods.generateServiceUrl = function(baseUrl = process.env.SERVICE_BASE_URL || 'http://localhost:3000') {
+  return `${baseUrl}/found?token=${this.serviceToken}`;
 };
 
 const User = mongoose.model('User', userSchema);
