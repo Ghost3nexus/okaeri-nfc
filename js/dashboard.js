@@ -24,7 +24,9 @@ function checkAuthentication() {
     console.log('checkAuthentication - ユーザー情報:', user);
     console.log('checkAuthentication - ローカルストレージからのトークン:', localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY));
     
-    if (!token || !user || !user._id) {
+    console.log('checkAuthentication - ユーザーオブジェクト構造:', JSON.stringify(user));
+    
+    if (!token) {
         console.log('認証情報がないためログインページにリダイレクト');
         // 認証情報がない場合はログインページにリダイレクト
         window.location.href = 'login.html';
