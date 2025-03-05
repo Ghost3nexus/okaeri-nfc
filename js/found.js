@@ -25,12 +25,33 @@ async function fetchOwnerInfo(token) {
     const errorElement = document.getElementById('errorInfo');
     
     try {
+        console.log('トークン:', token);
         const response = await fetchAPI(`/users/found?token=${token}`);
+        
+        // APIレスポンスがない場合、直接APIエンドポイントにアクセスを試みる
+        if (!response || !response.success) {
+            console.log('直接APIエンドポイントにアクセスを試みます');
+            const directResponse = await fetch(`${CONFIG.API_BASE_URL}/users/found?token=${token}`);
+            if (!directResponse.ok) {
+                throw new Error('API直接アクセスに失敗しました');
+            }
+            const directData = await directResponse.json();
+            console.log('直接APIレスポンス:', directData);
+            return directData;
+        }
         
         console.log('API Response:', response);
         
         if (response.success && response.data) {
             // 持ち主情報を表示
+            displayOwnerInfo(response.data);
+            
+            // 表示を切り替え
+            userInfoElement.classList.remove('d-none');
+            loadingElement.classList.add('d-none');
+            errorElement.classList.add('d-none');
+        } else if (response.data) {
+            // 直接APIアクセスの場合
             displayOwnerInfo(response.data);
             
             // 表示を切り替え
