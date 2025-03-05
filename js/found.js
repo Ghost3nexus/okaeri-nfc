@@ -37,7 +37,17 @@ async function fetchOwnerInfo(token) {
             }
             const directData = await directResponse.json();
             console.log('直接APIレスポンス:', directData);
-            return directData;
+            
+            if (directData.success && directData.data) {
+                // 持ち主情報を表示
+                displayOwnerInfo(directData.data);
+                
+                // 表示を切り替え
+                userInfoElement.classList.remove('d-none');
+                loadingElement.classList.add('d-none');
+                errorElement.classList.add('d-none');
+                return;
+            }
         }
         
         console.log('API Response:', response);

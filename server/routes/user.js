@@ -226,20 +226,17 @@ router.get('/found', async (req, res) => {
     
     // MongoDBをスキップする場合はモックデータを使用
     if (process.env.SKIP_MONGODB === 'true') {
-      if (token === 'demo123') {
-        return res.status(200).json({
-          success: true,
-          data: {
-            name: 'デモユーザー',
-            email: 'demo@example.com'
-          }
-        });
-      } else {
-        return res.status(404).json({
-          success: false,
-          message: '指定されたトークンのユーザーが見つかりません'
-        });
-      }
+      console.log('モックデータを使用します。トークン:', token);
+      
+      // デモモードでは任意のトークンでユーザー情報を返す
+      return res.status(200).json({
+        success: true,
+        data: {
+          name: 'デモユーザー',
+          email: 'demo@example.com',
+          phone: '090-1234-5678'
+        }
+      });
     }
     
     // トークンからユーザーを検索
