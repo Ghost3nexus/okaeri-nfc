@@ -1,5 +1,5 @@
 /**
- * おかえりNFC - タグ管理JavaScript
+ * おかえりNFC - NFCタグ設定JavaScript
  */
 
 // DOMが完全に読み込まれた後に実行
@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // イベントリスナーの設定
     setupEventListeners();
+    
+    // URLパラメータからタグIDを取得して選択
+    selectTagFromUrlParam();
 });
 
 /**
@@ -66,6 +69,9 @@ function initTagSelect() {
                     option.textContent = 'タグが登録されていません';
                     tagSelect.appendChild(option);
                     tagSelect.disabled = true;
+                    
+                    // タグが選択されていない表示を表示
+                    document.getElementById('noTagSelected').classList.remove('d-none');
                     return;
                 }
                 
@@ -87,14 +93,14 @@ function initTagSelect() {
                         
                         if (selectedTag) {
                             // タグ詳細情報を表示
-                            displayTagDetails(selectedTag);
+                            showTagDetails();
                             
                             // サービスURL情報を取得
                             fetchTagServiceUrl(selectedTagId);
                         }
                     } else {
                         // タグが選択されていない場合は詳細情報を非表示
-                        document.getElementById('tagDetails').classList.add('d-none');
+                        hideTagDetails();
                     }
                 });
             })
@@ -107,6 +113,8 @@ function initTagSelect() {
                 option.textContent = 'タグの読み込みに失敗しました';
                 tagSelect.appendChild(option);
                 tagSelect.disabled = true;
+                
+                showToast('タグ一覧の取得に失敗しました', 'error');
             });
     }
 }
@@ -162,6 +170,33 @@ function setupEventListeners() {
 }
 
 /**
+ * URLパラメータからタグIDを取得して選択
+ */
+function selectTagFromUrlParam() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagId = urlParams.get('tagId');
+    
+    if (tagId) {
+        const tagSelect = document.getElementById('tagSelect');
+        
+        // タグ選択肢が読み込まれるまで少し待つ
+        setTimeout(() => {
+            if (tagSelect && tagSelect.options.length > 1) {
+                // 該当するタグを選択
+                for (let i = 0; i < tagSelect.options.length; i++) {
+                    if (tagSelect.options[i].value === tagId) {
+                        tagSelect.selectedIndex = i;
+                        // 変更イベントを発火
+                        tagSelect.dispatchEvent(new Event('change'));
+                        break;
+                    }
+                }
+            }
+        }, 500);
+    }
+}
+
+/**
  * ユーザーのタグ一覧を取得
  * @returns {Promise<Array>} タグ一覧
  */
@@ -190,27 +225,22 @@ async function fetchUserTags() {
 
 /**
  * タグ詳細情報を表示
- * @param {Object} tag - タグ情報
  */
-function displayTagDetails(tag) {
+function showTagDetails() {
     // タグ詳細エリアを表示
-    const tagDetailsElement = document.getElementById('tagDetails');
-    if (tagDetailsElement) {
-        tagDetailsElement.classList.remove('d-none');
-    }
-    
-    // タグ基本情報を表示
-    document.getElementById('tagName').textContent = tag.name || '-';
-    document.getElementById('tagId').textContent = tag.tagId || '-';
-    document.getElementById('tagType').textContent = tag.itemType || '-';
-    document.getElementById('tagStatus').textContent = tag.isActive ? 'アクティブ' : '非アクティブ';
-    
-    // 日付の表示
-    const registeredAt = tag.registeredAt ? new Date(tag.registeredAt).toLocaleString('ja-JP') : '-';
-    document.getElementById('tagRegisteredAt').textContent = registeredAt;
-    
-    const lastFoundAt = tag.lastFoundAt ? new Date(tag.lastFoundAt).toLocaleString('ja-JP') : '-';
-    document.getElementById('tagLastFoundAt').textContent = lastFoundAt;
+    document.getElementById('tagDetails').classList.remove('d-none');
+    // タグが選択されていない表示を非表示
+    document.getElementById('noTagSelected').classList.add('d-none');
+}
+
+/**
+ * タグ詳細情報を非表示
+ */
+function hideTagDetails() {
+    // タグ詳細エリアを非表示
+    document.getElementById('tagDetails').classList.add('d-none');
+    // タグが選択されていない表示を表示
+    document.getElementById('noTagSelected').classList.remove('d-none');
 }
 
 /**

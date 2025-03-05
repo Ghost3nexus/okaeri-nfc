@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFCタグ設定ガイド - おかえりNFC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header class="bg-primary-custom">
+        <div class="container py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="index.html" class="text-white text-decoration-none">
+                    <h1 class="h4 mb-0"><i class="fas fa-home me-2"></i>おかえりNFC</h1>
+                </a>
+                <div class="dropdown">
+                    <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-1"></i> <span id="userName">ユーザー</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="profile.html"><i class="fas fa-user me-2"></i>プロフィール</a></li>
+                        <li><a class="dropdown-item" href="#" id="logoutButton"><i class="fas fa-sign-out-alt me-2"></i>ログアウト</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="py-4">
+        <div class="container">
+            <div class="row">
+                <!-- サイドバー -->
+                <div class="col-lg-3 mb-4">
+                    <div class="list-group">
+                        <a href="dashboard.html" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tachometer-alt me-2"></i>ダッシュボード
+                        </a>
+                        <a href="my-tags.html" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tags me-2"></i>マイタグ
+                        </a>
+                        <a href="register-tag.html" class="list-group-item list-group-item-action">
+                            <i class="fas fa-plus-circle me-2"></i>タグ登録
+                        </a>
+                        <a href="notifications.html" class="list-group-item list-group-item-action">
+                            <i class="fas fa-bell me-2"></i>通知
+                        </a>
+                        <a href="profile.html" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user me-2"></i>プロフィール
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- メインコンテンツ -->
+                <div class="col-lg-9">
+                    <!-- タグ選択 -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h2 class="card-title h4 mb-3">NFCタグ設定ガイド</h2>
+                            <p class="text-muted">登録したタグにサービスURLを書き込む手順を説明します。</p>
+                            
+                            <div class="mb-4">
+                                <label for="tagSelect" class="form-label">設定するタグを選択</label>
+                                <select class="form-select" id="tagSelect">
+                                    <option value="" selected>タグを選択してください</option>
+                                    <!-- タグリストはJavaScriptで動的に生成 -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- タグ詳細情報 -->
+                    <div id="tagDetails" class="d-none">
+                        <!-- サービスURL情報 -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h3 class="h5 mb-0">サービスURL</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="serviceUrl" class="form-label">サービスURL</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="serviceUrl" readonly>
+                                        <button class="btn btn-outline-secondary" type="button" id="copyUrlButton">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">このURLをNFCタグに書き込みます</div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">QRコード</label>
+                                            <div class="text-center p-3 border rounded" id="qrCodeContainer">
+                                                <img id="qrCodeImage" src="" alt="QRコード" class="img-fluid" style="max-width: 200px;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">NFC書き込みステータス</label>
+                                            <div class="p-3 border rounded">
+                                                <div id="nfcWrittenStatus">
+                                                    <div class="d-flex align-items-center mb-2">
+                                                        <i class="fas fa-circle text-warning me-2"></i>
+                                                        <span>未書き込み</span>
+                                                    </div>
+                                                    <button class="btn btn-primary w-100" id="updateNfcStatusButton">
+                                                        <i class="fas fa-check-circle me-1"></i>書き込み完了をマーク
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <button class="btn btn-outline-primary" id="regenerateUrlButton">
+                                        <i class="fas fa-sync-alt me-1"></i>URLを再生成
+                                    </button>
+                                    <div class="form-text text-warning mt-1">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        URLを再生成すると、既存のQRコードやNFCタグは使用できなくなります
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- NFC書き込み手順 -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-light">
+                                <h3 class="h5 mb-0">NFC書き込み手順</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-4">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    スマートフォンのNFC機能を使って、タグにサービスURLを書き込みます。
+                                </div>
+                                
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <h4 class="h6 mb-3">Android端末の場合</h4>
+                                        <ol class="mb-0">
+                                            <li class="mb-2">「NFC Tools」や「NFC Writer」などのアプリをインストール</li>
+                                            <li class="mb-2">アプリを起動し、「URLを書き込む」または「Webサイト」オプションを選択</li>
+                                            <li class="mb-2">上記のサービスURLを入力</li>
+                                            <li class="mb-2">NFCタグをスマートフォンにかざして書き込み</li>
+                                            <li>書き込みが完了したら「書き込み完了をマーク」ボタンをクリック</li>
+                                        </ol>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h4 class="h6 mb-3">iPhone（iOS 13以降）の場合</h4>
+                                        <ol class="mb-0">
+                                            <li class="mb-2">「NFC Tools」などのアプリをインストール</li>
+                                            <li class="mb-2">アプリを起動し、「URLを書き込む」または「Webサイト」オプションを選択</li>
+                                            <li class="mb-2">上記のサービスURLを入力</li>
+                                            <li class="mb-2">NFCタグをiPhoneの上部にかざして書き込み</li>
+                                            <li>書き込みが完了したら「書き込み完了をマーク」ボタンをクリック</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <div class="ratio ratio-16x9" style="max-width: 560px; margin: 0 auto;">
+                                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="NFCタグ書き込み方法" allowfullscreen></iframe>
+                                    </div>
+                                    <p class="text-muted mt-2">※ 動画でも書き込み方法を確認できます</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- テスト方法 -->
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-light">
+                                <h3 class="h5 mb-0">テスト方法</h3>
+                            </div>
+                            <div class="card-body">
+                                <ol class="mb-0">
+                                    <li class="mb-2">スマートフォンのNFC機能が有効になっていることを確認します</li>
+                                    <li class="mb-2">書き込んだNFCタグをスマートフォンにかざします</li>
+                                    <li class="mb-2">ブラウザが起動し、発見フォームが表示されることを確認します</li>
+                                    <li>テスト用の情報を入力して送信し、通知が届くことを確認します</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- タグが選択されていない場合のメッセージ -->
+                    <div id="noTagSelected" class="card shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-tag text-muted" style="font-size: 3rem;"></i>
+                            <h3 class="h5 mt-3">タグを選択してください</h3>
+                            <p class="text-muted">左のドロップダウンメニューからタグを選択すると、<br>設定情報が表示されます。</p>
+                            
+                            <div class="mt-4">
+                                <a href="register-tag.html" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle me-2"></i>新しいタグを登録する
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>おかえりNFC</h5>
+                    <p class="text-muted">NFCタグを活用した落とし物発見サービス</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5>リンク</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html" class="text-decoration-none text-muted">ホーム</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">サービスの使い方</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">よくある質問</a></li>
+                        <li><a href="#" class="text-decoration-none text-muted">お問い合わせ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>お問い合わせ</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-envelope me-2"></i>info@okaeri-nfc.jp</li>
+                        <li><i class="fas fa-phone me-2"></i>03-1234-5678</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center text-muted">
+                <small>&copy; 2025 おかえりNFC. All rights reserved.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/nfc-setup.js"></script>
+</body>
+</html>

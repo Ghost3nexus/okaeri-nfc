@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -29,6 +30,10 @@ const userSchema = new mongoose.Schema({
       },
       message: '有効な電話番号を入力してください'
     }
+  },
+  address: {
+    type: String,
+    trim: true
   },
   createdAt: {
     type: Date,

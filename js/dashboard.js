@@ -1,290 +1,270 @@
 /**
- * おかえりNFC - ダッシュボード用JavaScriptファイル
+ * おかえりNFC - ダッシュボードJavaScript
  */
-
-// APIのベースURL
-const API_BASE_URL = '/api';
 
 // DOMが完全に読み込まれた後に実行
 document.addEventListener('DOMContentLoaded', function() {
-    // 認証チェック
+    // ユーザー認証チェック
     checkAuthentication();
     
-    // ユーザー情報の表示
-    displayUserInfo();
-    
-    // ダッシュボードデータの読み込み
-    loadDashboardData();
-    
-    // ログアウトボタンの設定
-    setupLogoutButton();
+    // ダッシュボード情報の読み込み
+    loadDashboardInfo();
 });
 
 /**
- * 認証チェック
- * ログインしていない場合はログインページにリダイレクト
+ * ユーザー認証チェック
  */
 function checkAuthentication() {
     const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
     
-    if (!token) {
-        window.location.href = 'index.html';
-        return;
-    }
-}
-
-/**
- * ユーザー情報の表示
- */
-function displayUserInfo() {
-    const userJson = localStorage.getItem('user');
-    
-    if (userJson) {
-        const user = JSON.parse(userJson);
-        const userNameElement = document.getElementById('userName');
-        
-        if (userNameElement && user.name) {
-            userNameElement.textContent = user.name;
-        }
-    }
-}
-
-/**
- * ダッシュボードデータの読み込み
- */
-function loadDashboardData() {
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
+    if (!token || !user) {
+        // 認証情報がない場合はログインページにリダイレクト
+        window.location.href = 'login.html';
         return;
     }
     
-    // ユーザー情報とタグの取得
-    fetch(`${API_BASE_URL}/users/me`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('ユーザー情報の取得に失敗しました');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // タグ数の表示
-        updateTagCount(data.data.tags.length);
-        
-        // タグリストの表示
-        displayTags(data.data.tags);
-        
-        // 通知の取得
-        return fetchNotifications(token, data.data.user._id);
-    })
-    .catch(error => {
-        console.error('データ取得エラー:', error);
-        showToast('データの取得に失敗しました', 'error');
-    });
-}
-
-/**
- * 通知の取得
- */
-function fetchNotifications(token, userId) {
-    return fetch(`${API_BASE_URL}/notifications/user/${userId}`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('通知の取得に失敗しました');
-        }
-        return response.json();
-    })
-    .then(data => {
-        // 未読通知数の表示
-        const unreadCount = data.data.notifications.filter(n => n.status === '未読').length;
-        updateUnreadCount(unreadCount);
-        
-        // 発見回数の表示
-        updateFoundCount(data.data.notifications.length);
-        
-        // 最近の通知の表示
-        displayRecentNotifications(data.data.notifications);
-    })
-    .catch(error => {
-        console.error('通知取得エラー:', error);
-        // 通知の取得に失敗した場合でも、エラーは表示せずに空の状態を表示
-        updateUnreadCount(0);
-        updateFoundCount(0);
-        displayRecentNotifications([]);
-    });
-}
-
-/**
- * タグ数の更新
- */
-function updateTagCount(count) {
-    const tagCountElement = document.getElementById('tagCount');
-    
-    if (tagCountElement) {
-        tagCountElement.textContent = count;
-    }
-}
-
-/**
- * 未読通知数の更新
- */
-function updateUnreadCount(count) {
-    const unreadCountElement = document.getElementById('unreadCount');
-    
-    if (unreadCountElement) {
-        unreadCountElement.textContent = count;
-    }
-}
-
-/**
- * 発見回数の更新
- */
-function updateFoundCount(count) {
-    const foundCountElement = document.getElementById('foundCount');
-    
-    if (foundCountElement) {
-        foundCountElement.textContent = count;
-    }
-}
-
-/**
- * タグリストの表示
- */
-function displayTags(tags) {
-    const tagsLoading = document.getElementById('tagsLoading');
-    const tagsEmpty = document.getElementById('tagsEmpty');
-    const tagsList = document.getElementById('tagsList');
-    const tagsTableBody = document.getElementById('tagsTableBody');
-    
-    // ローディング表示を非表示
-    if (tagsLoading) {
-        tagsLoading.classList.add('d-none');
+    // ユーザー名を表示
+    const userNameElement = document.getElementById('userName');
+    if (userNameElement && user.name) {
+        userNameElement.textContent = user.name;
     }
     
-    // タグがない場合
-    if (!tags || tags.length === 0) {
-        if (tagsEmpty) {
-            tagsEmpty.classList.remove('d-none');
-        }
-        return;
-    }
-    
-    // タグリストを表示
-    if (tagsList) {
-        tagsList.classList.remove('d-none');
-    }
-    
-    // タグテーブルの内容をクリア
-    if (tagsTableBody) {
-        tagsTableBody.innerHTML = '';
-        
-        // 最大5件まで表示
-        const displayTags = tags.slice(0, 5);
-        
-        // タグ行の追加
-        displayTags.forEach(tag => {
-            const row = document.createElement('tr');
-            
-            // ステータスクラスの設定
-            const statusClass = tag.isActive ? 'text-success' : 'text-danger';
-            const statusText = tag.isActive ? '有効' : '無効';
-            
-            row.innerHTML = `
-                <td>${tag.name}</td>
-                <td><code>${tag.tagId}</code></td>
-                <td>${tag.itemType || 'その他'}</td>
-                <td><span class="${statusClass}">${statusText}</span></td>
-            `;
-            
-            tagsTableBody.appendChild(row);
-        });
-    }
-}
-
-/**
- * 最近の通知の表示
- */
-function displayRecentNotifications(notifications) {
-    const notificationsLoading = document.getElementById('notificationsLoading');
-    const notificationsEmpty = document.getElementById('notificationsEmpty');
-    const notificationsList = document.getElementById('notificationsList');
-    
-    // ローディング表示を非表示
-    if (notificationsLoading) {
-        notificationsLoading.classList.add('d-none');
-    }
-    
-    // 通知がない場合
-    if (!notifications || notifications.length === 0) {
-        if (notificationsEmpty) {
-            notificationsEmpty.classList.remove('d-none');
-        }
-        return;
-    }
-    
-    // 通知リストを表示
-    if (notificationsList) {
-        notificationsList.classList.remove('d-none');
-        notificationsList.innerHTML = '';
-        
-        // 最大5件まで表示
-        const recentNotifications = notifications.slice(0, 5);
-        
-        // 通知アイテムの追加
-        recentNotifications.forEach(notification => {
-            const notificationDate = new Date(notification.createdAt);
-            const formattedDate = notificationDate.toLocaleDateString('ja-JP') + ' ' + 
-                                 notificationDate.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-            
-            // ステータスクラスの設定
-            const statusClass = notification.status === '未読' ? 'bg-light' : '';
-            
-            const item = document.createElement('a');
-            item.href = `notification-detail.html?id=${notification._id}`;
-            item.className = `list-group-item list-group-item-action ${statusClass}`;
-            
-            item.innerHTML = `
-                <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">${notification.tag ? notification.tag.name : 'タグ名不明'} が見つかりました</h6>
-                    <small class="text-muted">${formattedDate}</small>
-                </div>
-                <p class="mb-1">発見場所: ${notification.location}</p>
-                <small class="text-muted">
-                    ${notification.status === '未読' ? '<span class="badge bg-danger">未読</span>' : ''}
-                </small>
-            `;
-            
-            notificationsList.appendChild(item);
-        });
-    }
-}
-
-/**
- * ログアウトボタンの設定
- */
-function setupLogoutButton() {
+    // ログアウトボタンの処理
     const logoutButton = document.getElementById('logoutButton');
-    
     if (logoutButton) {
         logoutButton.addEventListener('click', function(event) {
             event.preventDefault();
             
-            // ローカルストレージからユーザー情報を削除
+            // ローカルストレージから認証情報を削除
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             
-            // ホームページにリダイレクト
-            window.location.href = 'index.html';
+            // ログインページにリダイレクト
+            window.location.href = 'login.html';
+        });
+    }
+}
+
+/**
+ * ダッシュボード情報の読み込み
+ */
+async function loadDashboardInfo() {
+    try {
+        // タグ一覧を取得
+        const tags = await fetchUserTags();
+        
+        // 通知一覧を取得
+        const notifications = await fetchUserNotifications();
+        
+        // ダッシュボード情報を表示
+        updateDashboardStats(tags, notifications);
+        
+        // 最近の通知を表示
+        displayRecentNotifications(notifications);
+        
+        // 登録済みタグを表示
+        displayRegisteredTags(tags);
+    } catch (error) {
+        console.error('ダッシュボード情報読み込みエラー:', error);
+        showToast('ダッシュボード情報の読み込みに失敗しました', 'error');
+    }
+}
+
+/**
+ * ユーザーのタグ一覧を取得
+ * @returns {Promise<Array>} タグ一覧
+ */
+async function fetchUserTags() {
+    try {
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${getApiBaseUrl()}/tags/user`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('タグ一覧の取得に失敗しました');
+        }
+        
+        const data = await response.json();
+        return data.data.tags;
+    } catch (error) {
+        console.error('タグ一覧取得エラー:', error);
+        throw error;
+    }
+}
+
+/**
+ * ユーザーの通知一覧を取得
+ * @returns {Promise<Array>} 通知一覧
+ */
+async function fetchUserNotifications() {
+    try {
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${getApiBaseUrl()}/notifications/user`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error('通知一覧の取得に失敗しました');
+        }
+        
+        const data = await response.json();
+        return data.data.notifications;
+    } catch (error) {
+        console.error('通知一覧取得エラー:', error);
+        throw error;
+    }
+}
+
+/**
+ * ダッシュボード統計情報を更新
+ * @param {Array} tags - タグ一覧
+ * @param {Array} notifications - 通知一覧
+ */
+function updateDashboardStats(tags, notifications) {
+    // タグ数
+    const tagCount = document.getElementById('tagCount');
+    if (tagCount) {
+        tagCount.textContent = tags.length;
+    }
+    
+    // 未読通知数
+    const unreadCount = document.getElementById('unreadCount');
+    if (unreadCount) {
+        const unreadNotifications = notifications.filter(notification => !notification.isRead);
+        unreadCount.textContent = unreadNotifications.length;
+    }
+    
+    // 発見回数
+    const foundCount = document.getElementById('foundCount');
+    if (foundCount) {
+        foundCount.textContent = notifications.length;
+    }
+}
+
+/**
+ * 最近の通知を表示
+ * @param {Array} notifications - 通知一覧
+ */
+function displayRecentNotifications(notifications) {
+    // ローディング表示を非表示
+    document.getElementById('notificationsLoading').classList.add('d-none');
+    
+    if (notifications.length === 0) {
+        // 通知がない場合
+        document.getElementById('notificationsEmpty').classList.remove('d-none');
+    } else {
+        // 通知がある場合
+        document.getElementById('notificationsList').classList.remove('d-none');
+        
+        const notificationsList = document.getElementById('notificationsList');
+        
+        // リストをクリア
+        notificationsList.innerHTML = '';
+        
+        // 最新5件のみ表示
+        const recentNotifications = notifications.slice(0, 5);
+        
+        // 通知ごとにリストアイテムを追加
+        recentNotifications.forEach(notification => {
+            const notificationDate = new Date(notification.createdAt).toLocaleString('ja-JP');
+            
+            const listItem = document.createElement('a');
+            listItem.href = `notification-detail.html?id=${notification._id}`;
+            listItem.className = 'list-group-item list-group-item-action';
+            
+            // 未読の場合はハイライト
+            if (!notification.isRead) {
+                listItem.classList.add('bg-light');
+            }
+            
+            listItem.innerHTML = `
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">
+                        ${!notification.isRead ? '<span class="badge bg-primary me-2">新着</span>' : ''}
+                        発見場所: ${notification.location || '不明'}
+                    </h6>
+                    <small class="text-muted">${notificationDate}</small>
+                </div>
+                <p class="mb-1 text-truncate">${notification.details || '詳細情報なし'}</p>
+                <small class="text-muted">
+                    <i class="fas fa-tag me-1"></i>${notification.tagName || 'タグ名不明'}
+                </small>
+            `;
+            
+            notificationsList.appendChild(listItem);
+        });
+    }
+}
+
+/**
+ * 登録済みタグを表示
+ * @param {Array} tags - タグ一覧
+ */
+function displayRegisteredTags(tags) {
+    // ローディング表示を非表示
+    document.getElementById('tagsLoading').classList.add('d-none');
+    
+    if (tags.length === 0) {
+        // タグがない場合
+        document.getElementById('tagsEmpty').classList.remove('d-none');
+    } else {
+        // タグがある場合
+        document.getElementById('tagsList').classList.remove('d-none');
+        
+        const tagsTableBody = document.getElementById('tagsTableBody');
+        
+        // テーブルをクリア
+        tagsTableBody.innerHTML = '';
+        
+        // 最新5件のみ表示
+        const recentTags = tags.slice(0, 5);
+        
+        // タグごとに行を追加
+        recentTags.forEach(tag => {
+            const row = document.createElement('tr');
+            row.style.cursor = 'pointer';
+            
+            // クリックイベント
+            row.addEventListener('click', function() {
+                window.location.href = `my-tags.html?tagId=${tag._id}`;
+            });
+            
+            // タグ名
+            const nameCell = document.createElement('td');
+            nameCell.textContent = tag.name || '-';
+            row.appendChild(nameCell);
+            
+            // タグID
+            const idCell = document.createElement('td');
+            idCell.textContent = tag.tagId || '-';
+            row.appendChild(idCell);
+            
+            // 種類
+            const typeCell = document.createElement('td');
+            typeCell.textContent = tag.itemType || '-';
+            row.appendChild(typeCell);
+            
+            // ステータス
+            const statusCell = document.createElement('td');
+            if (tag.nfcWritten) {
+                statusCell.innerHTML = '<span class="badge bg-success">書き込み済み</span>';
+            } else {
+                statusCell.innerHTML = '<span class="badge bg-warning text-dark">未書き込み</span>';
+            }
+            row.appendChild(statusCell);
+            
+            // 行をテーブルに追加
+            tagsTableBody.appendChild(row);
         });
     }
 }

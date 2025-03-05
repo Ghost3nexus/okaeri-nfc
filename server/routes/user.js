@@ -77,6 +77,29 @@ router.post('/login', async (req, res) => {
       });
     }
     
+    // MongoDBをスキップする場合はモックデータを使用
+    if (process.env.SKIP_MONGODB === 'true') {
+      // デモ用のモックユーザー
+      if (email === 'demo@example.com' && password === 'password123') {
+        const mockUser = {
+          _id: 'mock-user-id-123',
+          name: 'デモユーザー',
+          email: 'demo@example.com',
+          role: 'user',
+          createdAt: new Date()
+        };
+        
+        // トークン生成と送信
+        return createSendToken(mockUser, 200, res);
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: 'メールアドレスまたはパスワードが正しくありません'
+        });
+      }
+    }
+    
+    // MongoDBを使用する場合は通常のログイン処理
     // ユーザー検索（パスワードを含める）
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.correctPassword(password, user.password))) {
@@ -175,7 +198,7 @@ router.patch('/updateMe', protect, async (req, res) => {
     
     // 更新するフィールドをフィルタリング
     const filteredBody = {};
-    const allowedFields = ['name', 'email', 'phone'];
+    const allowedFields = ['name', 'email', 'phone', 'address'];
     Object.keys(req.body).forEach(key => {
       if (allowedFields.includes(key)) {
         filteredBody[key] = req.body[key];
@@ -185,6 +208,66 @@ router.patch('/updateMe', protect, async (req, res) => {
     // ユーザー情報を更新
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
+      filteredBody,
+      { new: true, runValidators: true }
+    );
+    
+    res.status(200).json({
+      success: true,
+      data: {
+        user: updatedUser
+      }
+    });
+  } catch (err) {
+    console.error('ユーザー更新エラー:', err);
+    res.status(500).json({
+      success: false,
+      message: 'ユーザー情報の更新中にエラーが発生しました',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+});
+
+// 特定のユーザー情報を更新（IDを指定）
+router.patch('/:id', protect, async (req, res) => {
+  try {
+    // パスワード更新は別のルートで処理
+    if (req.body.password) {
+      return res.status(400).json({
+        success: false,
+        message: 'このルートではパスワードを更新できません'
+      });
+    }
+    
+    // 更新するフィールドをフィルタリング
+    const filteredBody = {};
+    const allowedFields = ['name', 'email', 'phone', 'address'];
+    Object.keys(req.body).forEach(key => {
+      if (allowedFields.includes(key)) {
+        filteredBody[key] = req.body[key];
+      }
+    });
+    
+    // ユーザーの存在確認
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: '指定されたユーザーが見つかりません'
+      });
+    }
+    
+    // 自分自身のアカウントのみ更新可能
+    if (req.params.id !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: '他のユーザーの情報を更新する権限がありません'
+      });
+    }
+    
+    // ユーザー情報を更新
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
       filteredBody,
       { new: true, runValidators: true }
     );

@@ -2,9 +2,6 @@
  * おかえりNFC - メインJavaScriptファイル
  */
 
-// APIのベースURL
-const API_BASE_URL = '/api';
-
 // DOMが完全に読み込まれた後に実行
 document.addEventListener('DOMContentLoaded', function() {
     // フォーム送信処理の初期化
@@ -50,7 +47,7 @@ function initFormSubmission() {
             showLoading(true);
             
             // APIエンドポイントに送信
-            fetch(`${API_BASE_URL}/notifications`, {
+            fetch(`${getApiBaseUrl()}/notifications`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -117,7 +114,7 @@ function initLoginForm() {
             submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>ログイン中...';
             
             // APIエンドポイントに送信
-            fetch(`${API_BASE_URL}/users/login`, {
+            fetch(`${getApiBaseUrl()}/users/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -169,7 +166,7 @@ function initSignupForm() {
             submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>登録中...';
             
             // APIエンドポイントに送信
-            fetch(`${API_BASE_URL}/users/signup`, {
+            fetch(`${getApiBaseUrl()}/users/signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -287,7 +284,7 @@ function initNfcReader() {
  * @param {string} token - URLトークン
  */
 function fetchTagInfo(tagId, token) {
-    fetch(`${API_BASE_URL}/tags/public/${tagId}?token=${token}`)
+    fetch(`${getApiBaseUrl()}/tags/public/${tagId}?token=${token}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('タグ情報の取得に失敗しました');

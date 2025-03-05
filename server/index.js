@@ -33,16 +33,69 @@ app.get('/found', (req, res) => {
   res.sendFile(path.join(__dirname, '../found.html'));
 });
 
-app.get('/tag-management', (req, res) => {
-  res.sendFile(path.join(__dirname, '../tag-management.html'));
-});
-
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, '../dashboard.html'));
 });
 
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../login.html'));
+});
+
+app.get('/register-tag', (req, res) => {
+  res.sendFile(path.join(__dirname, '../register-tag.html'));
+});
+
+app.get('/nfc-setup', (req, res) => {
+  res.sendFile(path.join(__dirname, '../nfc-setup.html'));
+});
+
+app.get('/my-tags', (req, res) => {
+  res.sendFile(path.join(__dirname, '../my-tags.html'));
+});
+
 // MongoDB接続（オプション）
 let dbConnected = false;
+
+/**
+ * エラーログを記録する関数
+ * @param {string} type - エラータイプ
+ * @param {Error} error - エラーオブジェクト
+ * @param {string} message - エラーメッセージ
+ */
+const logError = (type, error, message) => {
+  const timestamp = new Date().toISOString();
+  const errorLog = {
+    timestamp,
+    type,
+    message,
+    error: error ? error.toString() : null,
+    stack: error && error.stack ? error.stack : null
+  };
+  
+  // コンソールにエラーを出力
+  console.error(`[${timestamp}] [${type}] ${message}:`, error);
+  
+  // エラーログをファイルに保存（オプション）
+  if (process.env.LOG_ERRORS === 'true') {
+    const fs = require('fs');
+    const logDir = path.join(__dirname, '../logs');
+    
+    // ログディレクトリが存在しない場合は作成
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    
+    const logFile = path.join(logDir, `error-${new Date().toISOString().split('T')[0]}.log`);
+    fs.appendFileSync(logFile, JSON.stringify(errorLog) + '\n');
+  }
+  
+  // 管理者に通知（オプション）
+  if (process.env.NOTIFY_ADMIN === 'true' && process.env.ADMIN_EMAIL) {
+    // メール通知（実装例）
+    // sendAdminNotification(errorLog);
+    console.log(`管理者通知が有効: ${process.env.ADMIN_EMAIL} に通知が送信されます`);
+  }
+};
 
 try {
   if (process.env.SKIP_MONGODB !== 'true') {
@@ -55,14 +108,14 @@ try {
       dbConnected = true;
     })
     .catch((err) => {
-      console.error('MongoDB接続エラー:', err);
+      logError('DATABASE', err, 'MongoDB接続エラー');
       console.log('MongoDBなしでサーバーを起動します（一部機能が制限されます）');
     });
   } else {
     console.log('MongoDBをスキップしてサーバーを起動します（一部機能が制限されます）');
   }
 } catch (err) {
-  console.error('MongoDB接続エラー:', err);
+  logError('DATABASE', err, 'MongoDB接続エラー（例外）');
   console.log('MongoDBなしでサーバーを起動します（一部機能が制限されます）');
 }
 
