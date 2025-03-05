@@ -10,7 +10,7 @@ window.APP_CONFIG = {
   version: '1.0.0',
   
   // API設定
-  apiBaseUrl: '/api',
+  apiBaseUrl: window.location.hostname.includes('render.com') ? '/api' : '/api',
   
   // 認証設定
   authTokenName: 'token',
