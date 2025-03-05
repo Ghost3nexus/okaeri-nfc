@@ -27,6 +27,8 @@ async function fetchOwnerInfo(token) {
     try {
         const response = await fetchAPI(`/users/found?token=${token}`);
         
+        console.log('API Response:', response);
+        
         if (response.success && response.data) {
             // 持ち主情報を表示
             displayOwnerInfo(response.data);
