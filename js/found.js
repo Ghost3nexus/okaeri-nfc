@@ -67,13 +67,41 @@ function displayOwnerInfo(ownerData) {
     // メールリンクを設定
     const mailtoLinkElement = document.getElementById('mailtoLink');
     if (mailtoLinkElement && ownerData.email) {
-        const subject = encodeURIComponent('【おかえりNFC】落とし物を発見しました');
-        const body = encodeURIComponent(
-            `${ownerData.name}様\n\nおかえりNFCを通じて、あなたの落とし物を発見しました。\n\n` +
-            `発見場所：\n発見日時：\n\n返却方法について相談させてください。\n\n` +
-            `よろしくお願いいたします。`
-        );
-        mailtoLinkElement.href = `mailto:${ownerData.email}?subject=${subject}&body=${body}`;
+        // メールリンクのクリックイベントを設定
+        mailtoLinkElement.addEventListener('click', function(e) {
+            // フォームから情報を取得
+            const relationship = document.getElementById('relationship').value;
+            const foundLocation = document.getElementById('foundLocation').value;
+            const message = document.getElementById('message').value;
+            
+            // メール本文を作成
+            const subject = encodeURIComponent('【おかえりNFC】落とし物を発見しました');
+            let body = `${ownerData.name}様\n\nおかえりNFCを通じて、あなたの落とし物を発見しました。\n\n`;
+            
+            // 本人との関係
+            if (relationship) {
+                body += `本人との関係：${relationship}\n`;
+            }
+            
+            // 発見場所
+            if (foundLocation) {
+                body += `発見場所：${foundLocation}\n`;
+            } else {
+                body += `発見場所：\n`;
+            }
+            
+            body += `発見日時：${new Date().toLocaleString('ja-JP')}\n\n`;
+            
+            // メッセージ
+            if (message) {
+                body += `メッセージ：\n${message}\n\n`;
+            }
+            
+            body += `返却方法について相談させてください。\n\nよろしくお願いいたします。`;
+            
+            // メールリンクを設定
+            this.href = `mailto:${ownerData.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        });
     }
     
     // 電話リンクを設定（電話番号がある場合のみ）

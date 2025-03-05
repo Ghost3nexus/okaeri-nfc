@@ -50,7 +50,35 @@
                                     <p id="ownerEmail" class="form-control-plaintext">-</p>
                                 </div>
                                 
-                                <div class="d-grid gap-2">
+                                <hr class="my-4">
+                                
+                                <h4 class="h6 mb-3">連絡情報</h4>
+                                
+                                <form id="contactForm">
+                                    <div class="mb-3">
+                                        <label for="relationship" class="form-label">本人との関係</label>
+                                        <select class="form-select" id="relationship" name="relationship">
+                                            <option value="">選択してください</option>
+                                            <option value="知人・友人">知人・友人</option>
+                                            <option value="同僚・取引先">同僚・取引先</option>
+                                            <option value="家族・親族">家族・親族</option>
+                                            <option value="見知らぬ人">見知らぬ人（偶然発見）</option>
+                                            <option value="その他">その他</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="foundLocation" class="form-label">発見場所</label>
+                                        <input type="text" class="form-control" id="foundLocation" name="foundLocation" placeholder="例：東京駅八重洲口付近">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="message" class="form-label">メッセージ（任意）</label>
+                                        <textarea class="form-control" id="message" name="message" rows="3" placeholder="持ち主へのメッセージがあれば入力してください"></textarea>
+                                    </div>
+                                </form>
+                                
+                                <div class="d-grid gap-2 mt-4">
                                     <a href="#" id="mailtoLink" class="btn btn-primary">
                                         <i class="fas fa-envelope me-2"></i>メールで連絡する
                                     </a>
