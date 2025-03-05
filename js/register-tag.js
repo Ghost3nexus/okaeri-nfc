@@ -18,10 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
  * ユーザー認証チェック
  */
 function checkAuthentication() {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+    const userStr = localStorage.getItem(CONFIG.STORAGE_USER_KEY);
+    const user = JSON.parse(userStr || '{}');
     
-    if (!token || !user) {
+    console.log('checkAuthentication - トークン:', token);
+    console.log('checkAuthentication - ユーザー情報:', user);
+    
+    if (!token) {
         // 認証情報がない場合はログインページにリダイレクト
         window.location.href = 'login.html';
         return;
@@ -40,8 +44,8 @@ function checkAuthentication() {
             event.preventDefault();
             
             // ローカルストレージから認証情報を削除
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            localStorage.removeItem(CONFIG.STORAGE_TOKEN_KEY);
+            localStorage.removeItem(CONFIG.STORAGE_USER_KEY);
             
             // ログインページにリダイレクト
             window.location.href = 'login.html';
@@ -100,9 +104,10 @@ function setupFormSubmission() {
  */
 async function registerTag(tagData) {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('registerTag - トークン:', token);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -131,15 +136,19 @@ async function registerTag(tagData) {
  */
 async function updateUserProfile(profileData) {
     try {
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        const userStr = localStorage.getItem(CONFIG.STORAGE_USER_KEY);
+        const user = JSON.parse(userStr || '{}');
+        
+        console.log('updateUserProfile - トークン:', token);
+        console.log('updateUserProfile - ユーザー情報:', user);
         
         // ユーザーIDが必要
         if (!user._id) {
             throw new Error('ユーザー情報が不足しています');
         }
         
-        const response = await fetch(`${getApiBaseUrl()}/users/${user._id}`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/users/${user._id}`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -156,7 +165,7 @@ async function updateUserProfile(profileData) {
         const data = await response.json();
         
         // ローカルストレージのユーザー情報を更新
-        localStorage.setItem('user', JSON.stringify(data.data.user));
+        localStorage.setItem(CONFIG.STORAGE_USER_KEY, JSON.stringify(data.data.user));
         
         return data.data.user;
     } catch (error) {
@@ -171,7 +180,10 @@ async function updateUserProfile(profileData) {
  * ユーザー情報の自動入力
  */
 function prefillUserInfo() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userStr = localStorage.getItem(CONFIG.STORAGE_USER_KEY);
+    const user = JSON.parse(userStr || '{}');
+    
+    console.log('prefillUserInfo - ユーザー情報:', user);
     
     if (user) {
         // 名前

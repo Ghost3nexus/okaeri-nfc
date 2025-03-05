@@ -21,10 +21,14 @@ document.addEventListener('DOMContentLoaded', function() {
  * ユーザー認証チェック
  */
 function checkAuthentication() {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+    const userStr = localStorage.getItem(CONFIG.STORAGE_USER_KEY);
+    const user = JSON.parse(userStr || '{}');
     
-    if (!token || !user) {
+    console.log('checkAuthentication - トークン:', token);
+    console.log('checkAuthentication - ユーザー情報:', user);
+    
+    if (!token) {
         // 認証情報がない場合はログインページにリダイレクト
         window.location.href = 'login.html';
         return;
@@ -43,8 +47,8 @@ function checkAuthentication() {
             event.preventDefault();
             
             // ローカルストレージから認証情報を削除
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            localStorage.removeItem(CONFIG.STORAGE_TOKEN_KEY);
+            localStorage.removeItem(CONFIG.STORAGE_USER_KEY);
             
             // ログインページにリダイレクト
             window.location.href = 'login.html';
@@ -163,9 +167,11 @@ async function loadUserTags() {
  */
 async function fetchUserTags() {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('fetchUserTags - トークン:', token);
+        console.log('fetchUserTags - APIベースURL:', CONFIG.API_BASE_URL);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags/user`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags/user`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -346,9 +352,10 @@ function showTagsList() {
  */
 async function fetchTagServiceUrl(tagId) {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('fetchTagServiceUrl - トークン:', token);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags/${tagId}/service-url`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags/${tagId}/service-url`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -434,9 +441,10 @@ function updateNfcStatusDisplay(isWritten, writtenAt) {
  */
 async function updateNfcWrittenStatus(tagId) {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('updateNfcWrittenStatus - トークン:', token);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags/${tagId}/nfc-status`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags/${tagId}/nfc-status`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -475,9 +483,10 @@ async function fetchTagNotifications(tagId) {
         document.getElementById('notificationsEmpty').classList.add('d-none');
         document.getElementById('notificationsList').classList.add('d-none');
         
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('fetchTagNotifications - トークン:', token);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags/${tagId}/notifications`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags/${tagId}/notifications`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -574,9 +583,10 @@ function showDeleteConfirmModal(tagId) {
  */
 async function deleteTag(tagId) {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('deleteTag - トークン:', token);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags/${tagId}`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags/${tagId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`

@@ -21,10 +21,14 @@ document.addEventListener('DOMContentLoaded', function() {
  * ユーザー認証チェック
  */
 function checkAuthentication() {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+    const userStr = localStorage.getItem(CONFIG.STORAGE_USER_KEY);
+    const user = JSON.parse(userStr || '{}');
     
-    if (!token || !user) {
+    console.log('checkAuthentication - トークン:', token);
+    console.log('checkAuthentication - ユーザー情報:', user);
+    
+    if (!token) {
         // 認証情報がない場合はログインページにリダイレクト
         window.location.href = 'login.html';
         return;
@@ -43,8 +47,8 @@ function checkAuthentication() {
             event.preventDefault();
             
             // ローカルストレージから認証情報を削除
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            localStorage.removeItem(CONFIG.STORAGE_TOKEN_KEY);
+            localStorage.removeItem(CONFIG.STORAGE_USER_KEY);
             
             // ログインページにリダイレクト
             window.location.href = 'login.html';
@@ -202,9 +206,10 @@ function selectTagFromUrlParam() {
  */
 async function fetchUserTags() {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('fetchUserTags - トークン:', token);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags/user`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags/user`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -249,9 +254,10 @@ function hideTagDetails() {
  */
 async function fetchTagServiceUrl(tagId) {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('fetchTagServiceUrl - トークン:', token);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags/${tagId}/service-url`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags/${tagId}/service-url`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -350,9 +356,10 @@ function updateNfcStatusDisplay(isWritten, writtenAt) {
  */
 async function updateNfcWrittenStatus(tagId) {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('updateNfcWrittenStatus - トークン:', token);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags/${tagId}/nfc-status`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags/${tagId}/nfc-status`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -383,9 +390,10 @@ async function updateNfcWrittenStatus(tagId) {
  */
 async function regenerateTagToken(tagId) {
     try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
+        console.log('regenerateTagToken - トークン:', token);
         
-        const response = await fetch(`${getApiBaseUrl()}/tags/${tagId}/regenerate-token`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/tags/${tagId}/regenerate-token`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
