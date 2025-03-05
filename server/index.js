@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const userRoutes = require('./routes/user');
+const tagRoutes = require('./routes/tag');
+const notificationRoutes = require('./routes/notification');
 
 // Express アプリの初期化
 const app = express();
@@ -19,6 +21,8 @@ app.use(express.static(path.join(__dirname, '../')));
 
 // APIルートの設定
 app.use('/api/users', userRoutes);
+app.use('/api/tags', tagRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // フロントエンドへのルーティング
 app.get('/', (req, res) => {
