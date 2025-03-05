@@ -73,19 +73,36 @@ function initLoginForm() {
                 // ログイン成功
                 console.log('ログイン成功:', data);
                 
+                // ローカルストレージをクリア
+                localStorage.clear();
+                sessionStorage.clear();
+                
                 // JWTトークンとユーザー情報を保存
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.data.user));
                 
+                // デバッグログ
+                console.log('保存されたトークン:', localStorage.getItem('token'));
+                console.log('保存されたユーザー情報:', localStorage.getItem('user'));
+                
                 // ログイン状態を保持しない場合のセッションストレージ対応（オプション）
                 if (!rememberMe) {
+                    console.log('ログイン状態を保持しない設定のため、セッションストレージに保存します');
+                    
                     // セッションストレージにも保存（ブラウザを閉じると消える）
                     sessionStorage.setItem('token', data.token);
                     sessionStorage.setItem('user', JSON.stringify(data.data.user));
                     
+                    // デバッグログ
+                    console.log('セッションストレージに保存されたトークン:', sessionStorage.getItem('token'));
+                    console.log('セッションストレージに保存されたユーザー情報:', sessionStorage.getItem('user'));
+                    
                     // ローカルストレージからは削除
                     localStorage.removeItem('token');
                     localStorage.removeItem('user');
+                    
+                    console.log('ローカルストレージから削除後のトークン:', localStorage.getItem('token'));
+                    console.log('ローカルストレージから削除後のユーザー情報:', localStorage.getItem('user'));
                 }
                 
                 // ダッシュボードページにリダイレクト

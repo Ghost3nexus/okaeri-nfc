@@ -108,6 +108,12 @@ function initLoginForm() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             
+            // ログイン状態を保持するかどうか
+            const rememberMe = document.getElementById('rememberMe') ? document.getElementById('rememberMe').checked : true;
+            
+            console.log('ログインフォーム送信 - メールアドレス:', email);
+            console.log('ログインフォーム送信 - ログイン状態を保持:', rememberMe);
+            
             // ローディング表示
             const submitButton = loginForm.querySelector('button[type="submit"]');
             submitButton.disabled = true;
@@ -128,9 +134,25 @@ function initLoginForm() {
                 return response.json();
             })
             .then(data => {
-                // トークンをローカルストレージに保存
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.data.user));
+                console.log('ログイン成功:', data);
+                
+                // ローカルストレージをクリア
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                if (rememberMe) {
+                    // ログイン状態を保持する場合はローカルストレージに保存
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                    
+                    console.log('ローカルストレージに保存されたトークン:', localStorage.getItem('token'));
+                } else {
+                    // ログイン状態を保持しない場合はセッションストレージに保存
+                    sessionStorage.setItem('token', data.token);
+                    sessionStorage.setItem('user', JSON.stringify(data.data.user));
+                    
+                    console.log('セッションストレージに保存されたトークン:', sessionStorage.getItem('token'));
+                }
                 
                 // ダッシュボードページにリダイレクト
                 window.location.href = '/dashboard.html';
@@ -160,6 +182,13 @@ function initSignupForm() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
+            // ログイン状態を保持するかどうか（登録フォームにもチェックボックスがある場合）
+            const rememberMe = document.getElementById('rememberMe') ? document.getElementById('rememberMe').checked : true;
+            
+            console.log('登録フォーム送信 - 名前:', name);
+            console.log('登録フォーム送信 - メールアドレス:', email);
+            console.log('登録フォーム送信 - ログイン状態を保持:', rememberMe);
+            
             // ローディング表示
             const submitButton = signupForm.querySelector('button[type="submit"]');
             submitButton.disabled = true;
@@ -180,9 +209,25 @@ function initSignupForm() {
                 return response.json();
             })
             .then(data => {
-                // トークンをローカルストレージに保存
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.data.user));
+                console.log('登録成功:', data);
+                
+                // ローカルストレージをクリア
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                if (rememberMe) {
+                    // ログイン状態を保持する場合はローカルストレージに保存
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                    
+                    console.log('ローカルストレージに保存されたトークン:', localStorage.getItem('token'));
+                } else {
+                    // ログイン状態を保持しない場合はセッションストレージに保存
+                    sessionStorage.setItem('token', data.token);
+                    sessionStorage.setItem('user', JSON.stringify(data.data.user));
+                    
+                    console.log('セッションストレージに保存されたトークン:', sessionStorage.getItem('token'));
+                }
                 
                 // ダッシュボードページにリダイレクト
                 window.location.href = '/dashboard.html';

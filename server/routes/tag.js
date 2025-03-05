@@ -24,9 +24,36 @@ const protect = async (req, res, next) => {
       });
     }
     
+    console.log('Received Token:', token);
+    
     // トークンの検証
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    console.log('Decoded Token:', decoded);
     
+    // MongoDBをスキップする場合はモックユーザーを使用
+    if (process.env.SKIP_MONGODB === 'true') {
+      // デモ用のモックユーザー
+      if (decoded.id === 'mock-user-id-123') {
+        const mockUser = {
+          _id: 'mock-user-id-123',
+          name: 'デモユーザー',
+          email: 'demo@example.com',
+          role: 'user',
+          createdAt: new Date()
+        };
+        
+        // リクエストにユーザー情報を追加
+        req.user = mockUser;
+        return next();
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: 'このトークンのユーザーは存在しません'
+        });
+      }
+    }
+    
+    // MongoDBを使用する場合は通常の処理
     // ユーザーの存在確認
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
@@ -160,6 +187,47 @@ router.get('/:id/service-url', protect, async (req, res) => {
 // ユーザーのタグ一覧を取得
 router.get('/user', protect, async (req, res) => {
   try {
+    // MongoDBをスキップする場合はモックデータを使用
+    if (process.env.SKIP_MONGODB === 'true') {
+      console.log('MongoDBがスキップされているため、モックデータを使用します');
+      
+      // デモ用のモックタグ
+      const mockTags = [
+        {
+          _id: 'mock-tag-id-1',
+          tagId: 'TAG001',
+          name: 'デモ用財布タグ',
+          description: 'デモ用の財布に付けるタグです',
+          itemType: '財布',
+          isActive: true,
+          registeredAt: new Date(),
+          urlToken: 'abc123',
+          nfcWritten: true,
+          nfcWrittenAt: new Date()
+        },
+        {
+          _id: 'mock-tag-id-2',
+          tagId: 'TAG002',
+          name: 'デモ用キータグ',
+          description: 'デモ用のキーに付けるタグです',
+          itemType: 'キー',
+          isActive: true,
+          registeredAt: new Date(),
+          urlToken: 'def456',
+          nfcWritten: false
+        }
+      ];
+      
+      return res.status(200).json({
+        success: true,
+        results: mockTags.length,
+        data: {
+          tags: mockTags
+        }
+      });
+    }
+    
+    // MongoDBを使用する場合は通常の処理
     const tags = await Tag.find({ owner: req.user._id });
     
     res.status(200).json({

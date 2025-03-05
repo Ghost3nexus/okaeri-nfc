@@ -15,10 +15,19 @@ document.addEventListener('DOMContentLoaded', function() {
  * ユーザー認証チェック
  */
 function checkAuthentication() {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    // ローカルストレージまたはセッションストレージからトークンとユーザー情報を取得
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const userFromLocal = localStorage.getItem('user');
+    const userFromSession = sessionStorage.getItem('user');
+    const user = JSON.parse(userFromLocal || userFromSession || '{}');
     
-    if (!token || !user) {
+    console.log('checkAuthentication - トークン:', token);
+    console.log('checkAuthentication - ユーザー情報:', user);
+    console.log('checkAuthentication - ローカルストレージからのトークン:', localStorage.getItem('token'));
+    console.log('checkAuthentication - セッションストレージからのトークン:', sessionStorage.getItem('token'));
+    
+    if (!token || !user || !user._id) {
+        console.log('認証情報がないためログインページにリダイレクト');
         // 認証情報がない場合はログインページにリダイレクト
         window.location.href = 'login.html';
         return;
@@ -36,9 +45,13 @@ function checkAuthentication() {
         logoutButton.addEventListener('click', function(event) {
             event.preventDefault();
             
-            // ローカルストレージから認証情報を削除
+            // ローカルストレージとセッションストレージから認証情報を削除
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
+            
+            console.log('ログアウト - 認証情報を削除しました');
             
             // ログインページにリダイレクト
             window.location.href = 'login.html';
@@ -77,7 +90,12 @@ async function loadDashboardInfo() {
  */
 async function fetchUserTags() {
     try {
-        const token = localStorage.getItem('token');
+        // ローカルストレージまたはセッションストレージからトークンを取得
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log('fetchUserTags - トークン:', token);
+        console.log('fetchUserTags - ローカルストレージからのトークン:', localStorage.getItem('token'));
+        console.log('fetchUserTags - セッションストレージからのトークン:', sessionStorage.getItem('token'));
+        console.log('fetchUserTags - APIベースURL:', getApiBaseUrl());
         
         const response = await fetch(`${getApiBaseUrl()}/tags/user`, {
             method: 'GET',
@@ -85,6 +103,8 @@ async function fetchUserTags() {
                 'Authorization': `Bearer ${token}`
             }
         });
+        
+        console.log('fetchUserTags - レスポンスステータス:', response.status);
         
         if (!response.ok) {
             throw new Error('タグ一覧の取得に失敗しました');
@@ -104,7 +124,12 @@ async function fetchUserTags() {
  */
 async function fetchUserNotifications() {
     try {
-        const token = localStorage.getItem('token');
+        // ローカルストレージまたはセッションストレージからトークンを取得
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log('fetchUserNotifications - トークン:', token);
+        console.log('fetchUserNotifications - ローカルストレージからのトークン:', localStorage.getItem('token'));
+        console.log('fetchUserNotifications - セッションストレージからのトークン:', sessionStorage.getItem('token'));
+        console.log('fetchUserNotifications - APIベースURL:', getApiBaseUrl());
         
         const response = await fetch(`${getApiBaseUrl()}/notifications/user`, {
             method: 'GET',
@@ -112,6 +137,8 @@ async function fetchUserNotifications() {
                 'Authorization': `Bearer ${token}`
             }
         });
+        
+        console.log('fetchUserNotifications - レスポンスステータス:', response.status);
         
         if (!response.ok) {
             throw new Error('通知一覧の取得に失敗しました');

@@ -7,11 +7,19 @@ const Tag = require('../models/Tag');
 
 // JWT トークン生成
 const signToken = (id) => {
-  return jwt.sign(
-    { id },
+  // idが文字列かどうかをチェック（モックユーザーの場合）
+  const payload = typeof id === 'string' ? { id } : { id: id.toString() };
+  
+  const token = jwt.sign(
+    payload,
     process.env.JWT_SECRET || 'your-secret-key',
     { expiresIn: process.env.JWT_EXPIRES_IN || '90d' }
   );
+  
+  console.log('Generated Token Payload:', payload);
+  console.log('Generated Token:', token);
+  
+  return token;
 };
 
 // 認証トークンを送信
@@ -137,9 +145,36 @@ const protect = async (req, res, next) => {
       });
     }
     
+    console.log('Received Token:', token);
+    
     // トークンの検証
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    console.log('Decoded Token:', decoded);
     
+    // MongoDBをスキップする場合はモックユーザーを使用
+    if (process.env.SKIP_MONGODB === 'true') {
+      // デモ用のモックユーザー
+      if (decoded.id === 'mock-user-id-123') {
+        const mockUser = {
+          _id: 'mock-user-id-123',
+          name: 'デモユーザー',
+          email: 'demo@example.com',
+          role: 'user',
+          createdAt: new Date()
+        };
+        
+        // リクエストにユーザー情報を追加
+        req.user = mockUser;
+        return next();
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: 'このトークンのユーザーは存在しません'
+        });
+      }
+    }
+    
+    // MongoDBを使用する場合は通常の処理
     // ユーザーの存在確認
     const currentUser = await User.findById(decoded.id);
     if (!currentUser) {
