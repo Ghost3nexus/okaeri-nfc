@@ -32,8 +32,9 @@ const protect = async (req, res, next) => {
     
     // MongoDBをスキップする場合はモックユーザーを使用
     if (process.env.SKIP_MONGODB === 'true') {
+      console.log('デコードされたトークンID:', decoded.id);
       // デモ用のモックユーザー
-      if (decoded.id === 'mock-user-id-123') {
+      if (decoded.id === 'mock-user-id-123' || decoded.id.toString() === 'mock-user-id-123') {
         const mockUser = {
           _id: 'mock-user-id-123',
           name: 'デモユーザー',
