@@ -23,7 +23,7 @@ function checkLoggedInStatus() {
     
     if (token && user && user._id) {
         // すでにログイン済みの場合はダッシュボードにリダイレクト
-        window.location.href = '/dashboard';
+        window.location.href = 'dashboard.html';
     }
 }
 
@@ -106,7 +106,7 @@ function initLoginForm() {
                 }
                 
                 // ダッシュボードページにリダイレクト
-                window.location.href = '/dashboard'; // .htmlを削除
+                window.location.href = 'dashboard.html';
             })
             .catch(error => {
                 console.error('ログインエラー:', error);

@@ -29,7 +29,7 @@ function checkAuthentication() {
     if (!token || !user || !user._id) {
         console.log('認証情報がないためログインページにリダイレクト');
         // 認証情報がない場合はログインページにリダイレクト
-        window.location.href = '/login';
+        window.location.href = 'login.html';
         return;
     }
     
@@ -54,7 +54,7 @@ function checkAuthentication() {
             console.log('ログアウト - 認証情報を削除しました');
             
             // ログインページにリダイレクト
-            window.location.href = '/login';
+            window.location.href = 'login.html';
         });
     }
 }
@@ -206,7 +206,7 @@ function displayRecentNotifications(notifications) {
             const notificationDate = new Date(notification.createdAt).toLocaleString('ja-JP');
             
             const listItem = document.createElement('a');
-            listItem.href = `/notification-detail?id=${notification._id}`;
+            listItem.href = `notification-detail.html?id=${notification._id}`;
             listItem.className = 'list-group-item list-group-item-action';
             
             // 未読の場合はハイライト
@@ -263,7 +263,7 @@ function displayRegisteredTags(tags) {
             
             // クリックイベント
             row.addEventListener('click', function() {
-                window.location.href = `/my-tags?tagId=${tag._id}`;
+                window.location.href = `my-tags.html?tagId=${tag._id}`;
             });
             
             // タグ名
