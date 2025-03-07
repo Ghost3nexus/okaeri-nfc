@@ -1,10 +1,10 @@
-# おかえりNFC
+# まもタグ
 
-NFCタグを活用した落とし物発見サービス「おかえりNFC」のソースコードです。
+NFCタグを活用した落とし物発見サービス「まもタグ」のソースコードです。
 
 ## 概要
 
-「おかえりNFC」は、NFCタグを使って持ち物を管理し、紛失した場合に発見者が簡単に持ち主に通知できるサービスです。
+「まもタグ」は、NFCタグを使って持ち物を管理し、紛失した場合に発見者が簡単に持ち主に通知できるサービスです。
 
 ### 主な機能
 
@@ -12,6 +12,25 @@ NFCタグを活用した落とし物発見サービス「おかえりNFC」の�
 - 発見者用フォームインターフェース
 - 持ち主への通知機能（メール）
 - ユーザーダッシュボード
+- 管理画面での通知確認機能
+
+### 最新の改善点
+
+- **プライバシー保護の強化**: 持ち主の個人情報（名前、連絡先）を発見者に表示しないよう変更
+- **通知方法の統一**: すべての通知メールを企業の統一アドレス（info@mamo-tag.jp）から送信
+- **管理画面への通知機能**: 落とし物発見時の通知をダッシュボードに表示
+
+### 通知機能の仕組み
+
+1. **通知の作成**:
+   - 落とし物発見ページで発見者が情報を入力
+   - 「通知を送信する」ボタンをクリック
+   - サーバーに通知データを送信
+
+2. **通知の表示場所**:
+   - ダッシュボード画面の「最近の通知」セクション
+   - 通知専用ページ（notifications.html）
+   - ダッシュボード上部の未読通知カウンター
 
 ## システム要件
 
@@ -23,8 +42,8 @@ NFCタグを活用した落とし物発見サービス「おかえりNFC」の�
 
 ```bash
 # リポジトリのクローン
-git clone https://github.com/yourusername/okaeri-nfc.git
-cd okaeri-nfc
+git clone https://github.com/yourusername/mamo-tag.git
+cd mamo-tag
 
 # 依存パッケージのインストール
 npm install
@@ -43,7 +62,7 @@ NODE_ENV=development
 
 # MongoDB設定
 SKIP_MONGODB=false
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.example.mongodb.net/okaeri-nfc?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.example.mongodb.net/mamo-tag?retryWrites=true&w=majority
 
 # JWT設定
 JWT_SECRET=your-secret-key-should-be-at-least-32-characters-long
@@ -56,6 +75,7 @@ EMAIL_PORT=587
 EMAIL_SECURE=false
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-password
+SENDER_EMAIL=info@mamo-tag.jp
 
 # フロントエンド URL
 FRONTEND_URL=http://localhost:3000
@@ -104,7 +124,7 @@ npm start
 ## プロジェクト構成
 
 ```
-おかえりNFC/
+まもタグ/
 ├── css/                  # スタイルシート
 ├── images/               # 画像ファイル
 ├── js/                   # クライアントサイドJavaScript
