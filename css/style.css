@@ -1,10 +1,10 @@
-/* おかえりNFC カスタムスタイル */
+/* まもタグ カスタムスタイル */
 
 /* カラー変数 */
 :root {
-    --primary-color: #8BC34A;       /* メインカラー（ライトグリーン） */
-    --primary-dark: #689F38;        /* ダークグリーン */
-    --primary-light: #DCEDC8;       /* ライトグリーン（薄い） */
+    --primary-color: #2196F3;       /* メインカラー（ブルー） */
+    --primary-dark: #1976D2;        /* ダークブルー */
+    --primary-light: #BBDEFB;       /* ライトブルー（薄い） */
     --accent-color: #FF9800;        /* アクセントカラー（オレンジ） */
     --text-dark: #333333;           /* テキスト（濃い） */
     --text-light: #757575;          /* テキスト（薄い） */
@@ -97,7 +97,7 @@ body {
 /* フォーム要素 */
 .form-control:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(139, 195, 74, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(33, 150, 243, 0.25);
 }
 
 /* アコーディオン */
@@ -108,7 +108,7 @@ body {
 
 .accordion-button:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.25rem rgba(139, 195, 74, 0.25);
+    box-shadow: 0 0 0 0.25rem rgba(33, 150, 243, 0.25);
 }
 
 /* フッターリンク */
@@ -174,7 +174,7 @@ footer a:hover {
 .spinner {
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(139, 195, 74, 0.3);
+    border: 4px solid rgba(33, 150, 243, 0.3);
     border-radius: 50%;
     border-top-color: var(--primary-color);
     animation: spin 1s ease-in-out infinite;

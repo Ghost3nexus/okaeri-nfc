@@ -1,17 +1,17 @@
 /**
- * おかえりNFC設定ファイル
+ * まもタグ設定ファイル
  * APIエンドポイントやその他の設定を管理します
  */
 
 const CONFIG = {
     // APIのベースURL
-    API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? 'http://localhost:3000/api' 
-        : 'https://okaeri-nfc.onrender.com/api',
+    API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3000/api'
+        : 'https://mamo-tag.onrender.com/api',
     
     // ローカルストレージのキー
-    STORAGE_TOKEN_KEY: 'okaeri_nfc_token',
-    STORAGE_USER_KEY: 'okaeri_nfc_user',
+    STORAGE_TOKEN_KEY: 'mamo_tag_token',
+    STORAGE_USER_KEY: 'mamo_tag_user',
     
     // トークンの有効期限（ミリ秒）
     TOKEN_EXPIRY: 90 * 24 * 60 * 60 * 1000, // 90日
@@ -19,7 +19,7 @@ const CONFIG = {
     // サービスのベースURL
     SERVICE_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:3000'
-        : 'https://okaeri-nfc.onrender.com'
+        : 'https://mamo-tag.onrender.com'
 };
 
 /**
