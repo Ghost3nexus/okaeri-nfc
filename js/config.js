@@ -7,7 +7,7 @@ const CONFIG = {
     // APIのベースURL
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:3000/api'
-        : 'https://mamo-tag.onrender.com/api',
+        : 'https://okaeri-nfc.onrender.com/api',
     
     // ローカルストレージのキー
     STORAGE_TOKEN_KEY: 'mamo_tag_token',
@@ -19,7 +19,7 @@ const CONFIG = {
     // サービスのベースURL
     SERVICE_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:3000'
-        : 'https://mamo-tag.onrender.com'
+        : 'https://okaeri-nfc.onrender.com'
 };
 
 /**
