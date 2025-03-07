@@ -27,7 +27,7 @@ if (process.env.SKIP_EMAIL !== 'true') {
     console.log('メール送信機能なしでサーバーを起動します');
   }
 } else {
-  console.log('メール送信機能をスキップします');
+  console.log('メール送信機能をスキップします (SKIP_EMAIL=true)');
 }
 
 // 通知の作成（発見者からの情報送信）
@@ -62,7 +62,7 @@ router.post('/', async (req, res) => {
       
       // デモモードでもメール送信をシミュレート
       let emailSent = false;
-      if (transporter) {
+      if (transporter && process.env.SKIP_EMAIL !== 'true') {
         try {
           // メールの件名と本文を作成
           const subject = '【まもタグ】落とし物が見つかりました';
@@ -97,6 +97,8 @@ ${message ? `\n■ 発見者からのメッセージ\n${message}` : ''}
         } catch (err) {
           console.error('デモモードのメール送信エラー:', err);
         }
+      } else {
+        console.log('デモモードでメール送信をスキップしました (SKIP_EMAIL=true または transporter未設定)');
       }
       
       // モックの通知データを作成（デモモード用）
@@ -260,14 +262,14 @@ ${message ? `\n■ 発見者からのメッセージ\n${message}` : ''}
             id: 'mock-notification-id',
             createdAt: new Date()
           },
-          mailtoLink: mailtoLink
+          emailSent: false
         }
       });
     }
 
     // サーバー側でメール送信
     let emailSent = false;
-    if (tag.owner && tag.owner.email && transporter) {
+    if (tag.owner && tag.owner.email && transporter && process.env.SKIP_EMAIL !== 'true') {
       try {
         // 送信元メールアドレスの設定
         const senderEmail = process.env.SENDER_EMAIL || 'info@mamo-tag.jp';
@@ -309,7 +311,8 @@ ${process.env.FRONTEND_URL || 'http://localhost:3000'}
         console.error('メール送信エラー:', err);
       }
     } else {
-      console.log('メール送信をスキップしました');
+      console.log('メール送信をスキップしました (SKIP_EMAIL=true または transporter未設定)');
+      // 通知はデータベースに保存されるので、メール送信がスキップされても問題ない
     }
 
     res.status(201).json({
