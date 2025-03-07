@@ -134,6 +134,7 @@ function displayOwnerInfo(ownerData) {
                     }
                     
                     // 通知APIを呼び出す
+                    let emailSent = false;
                     try {
                         const token = getUrlParam('token');
                         const notificationData = {
@@ -161,16 +162,20 @@ function displayOwnerInfo(ownerData) {
                         
                         if (responseData.success) {
                             console.log('通知が正常に送信されました');
+                            emailSent = responseData.data && responseData.data.emailSent;
+                            
+                            // 送信完了メッセージを表示
+                            if (emailSent) {
+                                alert('通知が送信されました。持ち主にメールで通知されます。');
+                            } else {
+                                alert('通知が送信されました。持ち主にはダッシュボードで通知されます。');
+                            }
+                        } else {
+                            alert('通知の送信に失敗しました。もう一度お試しください。');
                         }
                     } catch (apiError) {
                         console.error('通知API呼び出しエラー:', apiError);
-                    }
-                    
-                    // 送信完了メッセージを表示
-                    if (responseData.data && responseData.data.emailSent) {
-                        alert('通知が送信されました。持ち主にメールで通知されます。');
-                    } else {
-                        alert('通知が送信されました。持ち主にはダッシュボードで通知されます。');
+                        alert('通知の送信中にエラーが発生しました。もう一度お試しください。');
                     }
                 } catch (error) {
                     console.error('メールリンク設定エラー:', error);
