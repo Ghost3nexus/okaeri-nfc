@@ -60,25 +60,44 @@ router.post('/', async (req, res) => {
       // 送信元メールアドレスの設定
       const senderEmail = process.env.SENDER_EMAIL || 'info@mamo-tag.jp';
       
-      // メール通知用のmailtoリンクを生成（デモモード）
-      const subject = encodeURIComponent('【まもタグ】落とし物が見つかりました');
-      const body = encodeURIComponent(
-        `まもタグ運営者様\n\n` +
-        `落とし物が見つかりました。\n\n` +
-        `■ 発見情報\n` +
-        `発見場所: ${location}\n` +
-        `発見日時: ${new Date(foundDate || Date.now()).toLocaleString('ja-JP')}\n` +
-        (details ? `詳細情報: ${details}\n` : '') +
-        (message ? `\n■ 発見者からのメッセージ\n${message}\n` : '') +
-        (contactEmail || contactPhone ? `\n■ 発見者の連絡先\n` +
-          (contactEmail ? `メールアドレス: ${contactEmail}\n` : '') +
-          (contactPhone ? `電話番号: ${contactPhone}\n` : '') : '') +
-        `\n※このメールは自動送信されています。\n` +
-        `© 2025 まもタグ. All rights reserved.`
-      );
-      
-      // mailtoリンクを生成（送信元を統一アドレスに設定）
-      const mailtoLink = `mailto:${senderEmail}?subject=${subject}&body=${body}`;
+      // デモモードでもメール送信をシミュレート
+      let emailSent = false;
+      if (transporter) {
+        try {
+          // メールの件名と本文を作成
+          const subject = '【まもタグ】落とし物が見つかりました';
+          
+          // メール本文
+          const body = `まもタグ運営者様
+
+落とし物が見つかりました。
+
+■ 発見情報
+発見場所: ${location}
+発見日時: ${new Date(foundDate || Date.now()).toLocaleString('ja-JP')}
+${details ? `詳細情報: ${details}` : ''}
+${message ? `\n■ 発見者からのメッセージ\n${message}` : ''}
+
+※このメールは自動送信されています。
+© 2025 まもタグ. All rights reserved.`;
+          
+          // メール送信オプション
+          const mailOptions = {
+            from: `"まもタグ" <${senderEmail}>`,
+            to: senderEmail, // 送信先を運営者アドレスに設定
+            bcc: 'demo@example.com', // デモユーザーにBCCで送信
+            subject: subject,
+            text: body
+          };
+          
+          // メール送信
+          await transporter.sendMail(mailOptions);
+          emailSent = true;
+          console.log('デモモードでメールを送信しました (送信元: ' + senderEmail + ')');
+        } catch (err) {
+          console.error('デモモードのメール送信エラー:', err);
+        }
+      }
       
       // モックの通知データを作成（デモモード用）
       const mockNotification = {
@@ -122,7 +141,7 @@ router.post('/', async (req, res) => {
             id: mockNotification._id,
             createdAt: mockNotification.createdAt
           },
-          mailtoLink: mailtoLink
+          emailSent: emailSent
         }
       });
     }
@@ -246,42 +265,51 @@ router.post('/', async (req, res) => {
       });
     }
 
-    // メール通知用のmailtoリンクを生成
-    let mailtoLink = null;
-    if (tag.owner && tag.owner.email) {
+    // サーバー側でメール送信
+    let emailSent = false;
+    if (tag.owner && tag.owner.email && transporter) {
       try {
         // 送信元メールアドレスの設定
         const senderEmail = process.env.SENDER_EMAIL || 'info@mamo-tag.jp';
         
         // メールの件名と本文を作成
-        const subject = encodeURIComponent('【まもタグ】あなたの持ち物が見つかりました');
+        const subject = '【まもタグ】あなたの持ち物が見つかりました';
         
         // メール本文
-        let body = encodeURIComponent(
-          `${tag.owner.name} 様\n\n` +
-          `あなたの持ち物「${tag.name}」が見つかりました。\n\n` +
-          `■ 発見情報\n` +
-          `発見場所: ${location}\n` +
-          `発見日時: ${new Date(foundDate || Date.now()).toLocaleString('ja-JP')}\n` +
-          (details ? `詳細情報: ${details}\n` : '') +
-          (message ? `\n■ 発見者からのメッセージ\n${message}\n` : '') +
-          (contactEmail || contactPhone ? `\n■ 発見者の連絡先\n` +
-            (contactEmail ? `メールアドレス: ${contactEmail}\n` : '') +
-            (contactPhone ? `電話番号: ${contactPhone}\n` : '') : '') +
-          `\n詳細はアカウントにログインしてご確認ください。\n` +
-          `${process.env.FRONTEND_URL || 'http://localhost:3000'}\n\n` +
-          `※このメールは自動送信されています。\n` +
-          `© 2025 まもタグ. All rights reserved.`
-        );
+        const body = `${tag.owner.name} 様
+
+あなたの持ち物「${tag.name}」が見つかりました。
+
+■ 発見情報
+発見場所: ${location}
+発見日時: ${new Date(foundDate || Date.now()).toLocaleString('ja-JP')}
+${details ? `詳細情報: ${details}` : ''}
+${message ? `\n■ 発見者からのメッセージ\n${message}` : ''}
+
+詳細はアカウントにログインしてご確認ください。
+${process.env.FRONTEND_URL || 'http://localhost:3000'}
+
+※このメールは自動送信されています。
+© 2025 まもタグ. All rights reserved.`;
         
-        // mailtoリンクを生成（送信元を統一アドレスに設定）
-        mailtoLink = `mailto:${tag.owner.email}?subject=${subject}&body=${body}&from=${senderEmail}`;
-        console.log(`持ち主(${tag.owner.email})へのmailtoリンクを生成しました (送信元: ${senderEmail})`);
+        // メール送信オプション
+        const mailOptions = {
+          from: `"まもタグ" <${senderEmail}>`,
+          to: senderEmail, // 送信先を運営者アドレスに設定
+          bcc: tag.owner.email, // 実際の持ち主にはBCCで送信
+          subject: subject,
+          text: body
+        };
+        
+        // メール送信
+        await transporter.sendMail(mailOptions);
+        emailSent = true;
+        console.log(`持ち主(${tag.owner.email})へメールを送信しました (送信元: ${senderEmail})`);
       } catch (err) {
-        console.error('mailtoリンク生成エラー:', err);
+        console.error('メール送信エラー:', err);
       }
     } else {
-      console.log('メール通知用のmailtoリンク生成をスキップしました');
+      console.log('メール送信をスキップしました');
     }
 
     res.status(201).json({
@@ -292,7 +320,7 @@ router.post('/', async (req, res) => {
           id: notification._id,
           createdAt: notification.createdAt
         },
-        mailtoLink: mailtoLink
+        emailSent: emailSent
       }
     });
   } catch (err) {

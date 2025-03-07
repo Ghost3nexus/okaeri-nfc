@@ -166,37 +166,12 @@ function displayOwnerInfo(ownerData) {
                         console.error('通知API呼び出しエラー:', apiError);
                     }
                     
-                    // メール本文を作成
-                    const subject = encodeURIComponent('【まもタグ】落とし物を発見しました');
-                    let body = `まもタグ運営者様\n\nまもタグを通じて、落とし物を発見しました。\n\n`;
-                    
-                    // 本人との関係
-                    if (relationship) {
-                        body += `本人との関係：${relationship}\n`;
-                    }
-                    
-                    // 発見場所
-                    if (foundLocation) {
-                        body += `発見場所：${foundLocation}\n`;
-                    } else {
-                        body += `発見場所：\n`;
-                    }
-                    
-                    body += `発見日時：${new Date().toLocaleString('ja-JP')}\n\n`;
-                    
-                    // メッセージ
-                    if (message) {
-                        body += `メッセージ：\n${message}\n\n`;
-                    }
-                    
-                    body += `返却方法について相談させてください。\n\nよろしくお願いいたします。`;
-                    
-                    // メールリンクを設定して開く
-                    const mailtoUrl = `mailto:${email}?subject=${subject}&body=${encodeURIComponent(body)}`;
-                    window.location.href = mailtoUrl;
-                    
                     // 送信完了メッセージを表示
-                    alert('通知が送信されました。メールアプリが開きます。');
+                    if (responseData.data && responseData.data.emailSent) {
+                        alert('通知が送信されました。持ち主にメールで通知されます。');
+                    } else {
+                        alert('通知が送信されました。持ち主にはダッシュボードで通知されます。');
+                    }
                 } catch (error) {
                     console.error('メールリンク設定エラー:', error);
                     this.href = `mailto:${email}?subject=【まもタグ】落とし物を発見しました`;
