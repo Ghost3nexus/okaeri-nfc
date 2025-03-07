@@ -189,7 +189,7 @@ function updateDashboardStats(tags, notifications) {
     // 未読通知数
     const unreadCount = document.getElementById('unreadCount');
     if (unreadCount) {
-        const unreadNotifications = notifications.filter(notification => !notification.isRead);
+        const unreadNotifications = notifications.filter(notification => notification.status === '未読');
         unreadCount.textContent = unreadNotifications.length;
     }
     
@@ -228,18 +228,18 @@ function displayRecentNotifications(notifications) {
             const notificationDate = new Date(notification.createdAt).toLocaleString('ja-JP');
             
             const listItem = document.createElement('a');
-            listItem.href = `notification-detail.html?id=${notification._id}`;
+            listItem.href = `notifications.html?id=${notification._id}`;
             listItem.className = 'list-group-item list-group-item-action';
             
             // 未読の場合はハイライト
-            if (!notification.isRead) {
+            if (notification.status === '未読') {
                 listItem.classList.add('bg-light');
             }
             
             listItem.innerHTML = `
                 <div class="d-flex w-100 justify-content-between">
                     <h6 class="mb-1">
-                        ${!notification.isRead ? '<span class="badge bg-primary me-2">新着</span>' : ''}
+                        ${notification.status === '未読' ? '<span class="badge bg-primary me-2">新着</span>' : ''}
                         発見場所: ${notification.location || '不明'}
                     </h6>
                     <small class="text-muted">${notificationDate}</small>
