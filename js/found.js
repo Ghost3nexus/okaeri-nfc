@@ -1,5 +1,5 @@
 /**
- * おかえりNFC - 落とし物発見ページのスクリプト
+ * まもタグ - 落とし物発見ページのスクリプト
  */
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -109,38 +109,66 @@ async function fetchOwnerInfo(token) {
  * @param {Object} ownerData - 持ち主データ
  */
 function displayOwnerInfo(ownerData) {
-    console.log('持ち主情報を表示します:', ownerData);
+    console.log('持ち主情報を取得しました');
     
     try {
-        // 名前を表示
-        const ownerNameElement = document.getElementById('ownerName');
-        if (ownerNameElement) {
-            ownerNameElement.textContent = ownerData.name || 'デモユーザー';
-        }
-        
-        // メールアドレスを表示
-        const ownerEmailElement = document.getElementById('ownerEmail');
-        if (ownerEmailElement) {
-            ownerEmailElement.textContent = ownerData.email || 'demo@example.com';
-        }
-        
         // メールリンクを設定
         const mailtoLinkElement = document.getElementById('mailtoLink');
         if (mailtoLinkElement) {
-            const email = ownerData.email || 'demo@example.com';
-            const name = ownerData.name || 'デモユーザー';
+            // 企業の共通メールアドレス
+            const email = 'info@mamo-tag.jp';
             
             // メールリンクのクリックイベントを設定
-            mailtoLinkElement.addEventListener('click', function(e) {
+            mailtoLinkElement.addEventListener('click', async function(e) {
                 try {
+                    e.preventDefault(); // デフォルトの動作を防止
+                    
                     // フォームから情報を取得
                     const relationship = document.getElementById('relationship')?.value || '';
                     const foundLocation = document.getElementById('foundLocation')?.value || '';
                     const message = document.getElementById('message')?.value || '';
                     
+                    if (!foundLocation) {
+                        alert('発見場所を入力してください');
+                        return;
+                    }
+                    
+                    // 通知APIを呼び出す
+                    try {
+                        const token = getUrlParam('token');
+                        const notificationData = {
+                            tagId: token,
+                            location: foundLocation,
+                            foundDate: new Date().toISOString(),
+                            details: `関係: ${relationship}`,
+                            message: message,
+                            contactEmail: email
+                        };
+                        
+                        console.log('通知データを送信します:', notificationData);
+                        
+                        // 通知APIを呼び出す
+                        const response = await fetch(`${CONFIG.API_BASE_URL}/notifications`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(notificationData)
+                        });
+                        
+                        const responseData = await response.json();
+                        console.log('通知API応答:', responseData);
+                        
+                        if (responseData.success) {
+                            console.log('通知が正常に送信されました');
+                        }
+                    } catch (apiError) {
+                        console.error('通知API呼び出しエラー:', apiError);
+                    }
+                    
                     // メール本文を作成
-                    const subject = encodeURIComponent('【おかえりNFC】落とし物を発見しました');
-                    let body = `${name}様\n\nおかえりNFCを通じて、あなたの落とし物を発見しました。\n\n`;
+                    const subject = encodeURIComponent('【まもタグ】落とし物を発見しました');
+                    let body = `まもタグ運営者様\n\nまもタグを通じて、落とし物を発見しました。\n\n`;
                     
                     // 本人との関係
                     if (relationship) {
@@ -163,20 +191,17 @@ function displayOwnerInfo(ownerData) {
                     
                     body += `返却方法について相談させてください。\n\nよろしくお願いいたします。`;
                     
-                    // メールリンクを設定
-                    this.href = `mailto:${email}?subject=${subject}&body=${encodeURIComponent(body)}`;
+                    // メールリンクを設定して開く
+                    const mailtoUrl = `mailto:${email}?subject=${subject}&body=${encodeURIComponent(body)}`;
+                    window.location.href = mailtoUrl;
+                    
+                    // 送信完了メッセージを表示
+                    alert('通知が送信されました。メールアプリが開きます。');
                 } catch (error) {
                     console.error('メールリンク設定エラー:', error);
-                    this.href = `mailto:${email}?subject=【おかえりNFC】落とし物を発見しました`;
+                    this.href = `mailto:${email}?subject=【まもタグ】落とし物を発見しました`;
                 }
             });
-        }
-        
-        // 電話リンクを設定（電話番号がある場合のみ）
-        const telLinkElement = document.getElementById('telLink');
-        if (telLinkElement && ownerData.phone) {
-            telLinkElement.href = `tel:${ownerData.phone}`;
-            telLinkElement.classList.remove('d-none');
         }
     } catch (error) {
         console.error('持ち主情報表示エラー:', error);

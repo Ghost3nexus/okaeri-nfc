@@ -19,7 +19,9 @@ if (process.env.SKIP_EMAIL !== 'true') {
         pass: process.env.EMAIL_PASS
       }
     });
-    console.log('メール送信設定が完了しました');
+    // 送信元メールアドレスの設定
+    const senderEmail = process.env.SENDER_EMAIL || 'info@mamo-tag.jp';
+    console.log(`メール送信設定が完了しました (送信元: ${senderEmail})`);
   } catch (err) {
     console.error('メール送信設定エラー:', err);
     console.log('メール送信機能なしでサーバーを起動します');
@@ -41,24 +43,28 @@ router.post('/', async (req, res) => {
       message
     } = req.body;
 
+    console.log('通知作成リクエスト受信:', {
+      tagId,
+      location,
+      foundDate,
+      details,
+      contactEmail,
+      contactPhone,
+      message
+    });
+
     // MongoDBがスキップされている場合はモックデータを使用
     if (process.env.SKIP_MONGODB === 'true') {
       console.log('MongoDBがスキップされているため、モックデータを使用します');
-      console.log('受信データ:', {
-        tagId,
-        location,
-        foundDate,
-        details,
-        contactEmail,
-        contactPhone,
-        message
-      });
+      
+      // 送信元メールアドレスの設定
+      const senderEmail = process.env.SENDER_EMAIL || 'info@mamo-tag.jp';
       
       // メール通知用のmailtoリンクを生成（デモモード）
-      const subject = encodeURIComponent('【おかえりNFC】あなたの持ち物が見つかりました');
+      const subject = encodeURIComponent('【まもタグ】落とし物が見つかりました');
       const body = encodeURIComponent(
-        `持ち主様\n\n` +
-        `あなたの持ち物が見つかりました。\n\n` +
+        `まもタグ運営者様\n\n` +
+        `落とし物が見つかりました。\n\n` +
         `■ 発見情報\n` +
         `発見場所: ${location}\n` +
         `発見日時: ${new Date(foundDate || Date.now()).toLocaleString('ja-JP')}\n` +
@@ -68,11 +74,44 @@ router.post('/', async (req, res) => {
           (contactEmail ? `メールアドレス: ${contactEmail}\n` : '') +
           (contactPhone ? `電話番号: ${contactPhone}\n` : '') : '') +
         `\n※このメールは自動送信されています。\n` +
-        `© 2025 おかえりNFC. All rights reserved.`
+        `© 2025 まもタグ. All rights reserved.`
       );
       
-      // mailtoリンクを生成（受信者は空欄）
-      const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+      // mailtoリンクを生成（送信元を統一アドレスに設定）
+      const mailtoLink = `mailto:${senderEmail}?subject=${subject}&body=${body}`;
+      
+      // モックの通知データを作成（デモモード用）
+      const mockNotification = {
+        _id: 'mock-notification-id-' + Date.now(),
+        tag: {
+          _id: 'mock-tag-id',
+          name: 'デモ用タグ',
+          tagId: tagId || 'TAG001'
+        },
+        location: location || '不明',
+        foundDate: foundDate || new Date(),
+        details: details || '詳細情報なし',
+        contactEmail: contactEmail || senderEmail,
+        message: message || '',
+        status: '未読',
+        createdAt: new Date()
+      };
+      
+      // モックデータをローカルストレージに保存（デモモード用）
+      try {
+        // 既存の通知を取得
+        const storedNotificationsStr = localStorage.getItem('mockNotifications');
+        let storedNotifications = storedNotificationsStr ? JSON.parse(storedNotificationsStr) : [];
+        
+        // 新しい通知を追加
+        storedNotifications.unshift(mockNotification);
+        
+        // ローカルストレージに保存
+        localStorage.setItem('mockNotifications', JSON.stringify(storedNotifications));
+        console.log('モック通知をローカルストレージに保存しました');
+      } catch (storageErr) {
+        console.error('ローカルストレージ保存エラー:', storageErr);
+      }
       
       // 成功レスポンスを返す
       return res.status(201).json({
@@ -80,8 +119,8 @@ router.post('/', async (req, res) => {
         message: '通知が正常に送信されました（デモモード）',
         data: {
           notification: {
-            id: 'mock-notification-id',
-            createdAt: new Date()
+            id: mockNotification._id,
+            createdAt: mockNotification.createdAt
           },
           mailtoLink: mailtoLink
         }
@@ -91,24 +130,37 @@ router.post('/', async (req, res) => {
     // タグIDからタグ情報を取得
     let tag;
     try {
-      tag = await Tag.findOne({ tagId }).populate({
+      // タグIDがサービストークンの場合とタグIDの場合の両方に対応
+      tag = await Tag.findOne({
+        $or: [
+          { tagId: tagId },
+          { serviceToken: tagId }
+        ]
+      }).populate({
         path: 'owner',
         select: 'name email phone'
       });
 
       if (!tag) {
+        console.log('指定されたタグが見つかりません:', tagId);
         return res.status(404).json({
           success: false,
           message: '指定されたタグが見つかりません'
         });
       }
+      
+      console.log('タグが見つかりました:', tag);
     } catch (dbErr) {
       console.error('データベース接続エラー:', dbErr);
+      
+      // 送信元メールアドレスの設定
+      const senderEmail = process.env.SENDER_EMAIL || 'info@mamo-tag.jp';
+      
       // メール通知用のmailtoリンクを生成（データベース接続エラー時）
-      const subject = encodeURIComponent('【おかえりNFC】あなたの持ち物が見つかりました');
+      const subject = encodeURIComponent('【まもタグ】落とし物が見つかりました');
       const body = encodeURIComponent(
-        `持ち主様\n\n` +
-        `あなたの持ち物が見つかりました。\n\n` +
+        `まもタグ運営者様\n\n` +
+        `落とし物が見つかりました。\n\n` +
         `■ 発見情報\n` +
         `発見場所: ${location}\n` +
         `発見日時: ${new Date(foundDate || Date.now()).toLocaleString('ja-JP')}\n` +
@@ -118,11 +170,11 @@ router.post('/', async (req, res) => {
           (contactEmail ? `メールアドレス: ${contactEmail}\n` : '') +
           (contactPhone ? `電話番号: ${contactPhone}\n` : '') : '') +
         `\n※このメールは自動送信されています。\n` +
-        `© 2025 おかえりNFC. All rights reserved.`
+        `© 2025 まもタグ. All rights reserved.`
       );
       
-      // mailtoリンクを生成（受信者は空欄）
-      const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+      // mailtoリンクを生成（送信元を統一アドレスに設定）
+      const mailtoLink = `mailto:${senderEmail}?subject=${subject}&body=${body}`;
       
       // データベースエラーの場合もデモモードで応答
       return res.status(201).json({
@@ -152,13 +204,19 @@ router.post('/', async (req, res) => {
         ipAddress: req.ip,
         userAgent: req.headers['user-agent']
       });
+      
+      console.log('通知が作成されました:', notification);
     } catch (dbErr) {
       console.error('通知作成エラー:', dbErr);
+      
+      // 送信元メールアドレスの設定
+      const senderEmail = process.env.SENDER_EMAIL || 'info@mamo-tag.jp';
+      
       // メール通知用のmailtoリンクを生成（通知作成エラー時）
-      const subject = encodeURIComponent('【おかえりNFC】あなたの持ち物が見つかりました');
+      const subject = encodeURIComponent('【まもタグ】落とし物が見つかりました');
       const body = encodeURIComponent(
-        `持ち主様\n\n` +
-        `あなたの持ち物が見つかりました。\n\n` +
+        `まもタグ運営者様\n\n` +
+        `落とし物が見つかりました。\n\n` +
         `■ 発見情報\n` +
         `発見場所: ${location}\n` +
         `発見日時: ${new Date(foundDate || Date.now()).toLocaleString('ja-JP')}\n` +
@@ -168,11 +226,11 @@ router.post('/', async (req, res) => {
           (contactEmail ? `メールアドレス: ${contactEmail}\n` : '') +
           (contactPhone ? `電話番号: ${contactPhone}\n` : '') : '') +
         `\n※このメールは自動送信されています。\n` +
-        `© 2025 おかえりNFC. All rights reserved.`
+        `© 2025 まもタグ. All rights reserved.`
       );
       
-      // mailtoリンクを生成（受信者は空欄）
-      const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+      // mailtoリンクを生成（送信元を統一アドレスに設定）
+      const mailtoLink = `mailto:${senderEmail}?subject=${subject}&body=${body}`;
       
       // データベースエラーの場合もデモモードで応答
       return res.status(201).json({
@@ -192,8 +250,11 @@ router.post('/', async (req, res) => {
     let mailtoLink = null;
     if (tag.owner && tag.owner.email) {
       try {
+        // 送信元メールアドレスの設定
+        const senderEmail = process.env.SENDER_EMAIL || 'info@mamo-tag.jp';
+        
         // メールの件名と本文を作成
-        const subject = encodeURIComponent('【おかえりNFC】あなたの持ち物が見つかりました');
+        const subject = encodeURIComponent('【まもタグ】あなたの持ち物が見つかりました');
         
         // メール本文
         let body = encodeURIComponent(
@@ -210,12 +271,12 @@ router.post('/', async (req, res) => {
           `\n詳細はアカウントにログインしてご確認ください。\n` +
           `${process.env.FRONTEND_URL || 'http://localhost:3000'}\n\n` +
           `※このメールは自動送信されています。\n` +
-          `© 2025 おかえりNFC. All rights reserved.`
+          `© 2025 まもタグ. All rights reserved.`
         );
         
-        // mailtoリンクを生成
-        mailtoLink = `mailto:${tag.owner.email}?subject=${subject}&body=${body}`;
-        console.log(`持ち主(${tag.owner.email})へのmailtoリンクを生成しました`);
+        // mailtoリンクを生成（送信元を統一アドレスに設定）
+        mailtoLink = `mailto:${tag.owner.email}?subject=${subject}&body=${body}&from=${senderEmail}`;
+        console.log(`持ち主(${tag.owner.email})へのmailtoリンクを生成しました (送信元: ${senderEmail})`);
       } catch (err) {
         console.error('mailtoリンク生成エラー:', err);
       }

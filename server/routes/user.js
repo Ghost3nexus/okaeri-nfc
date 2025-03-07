@@ -228,13 +228,11 @@ router.get('/found', async (req, res) => {
     if (process.env.SKIP_MONGODB === 'true') {
       console.log('モックデータを使用します。トークン:', token);
       
-      // デモモードでは任意のトークンでユーザー情報を返す
+      // デモモードでは任意のトークンで成功レスポンスを返す（個人情報なし）
       return res.status(200).json({
         success: true,
         data: {
-          name: 'デモユーザー',
-          email: 'demo@example.com',
-          phone: '090-1234-5678'
+          tagFound: true
         }
       });
     }
@@ -249,12 +247,11 @@ router.get('/found', async (req, res) => {
       });
     }
     
-    // 公開情報のみを返す
+    // 個人情報を含まないレスポンスを返す
     res.status(200).json({
       success: true,
       data: {
-        name: user.name,
-        email: user.email
+        tagFound: true
       }
     });
   } catch (err) {

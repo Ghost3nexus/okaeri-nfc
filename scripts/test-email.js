@@ -61,18 +61,22 @@ transporter.verify()
     console.log('SMTPサーバーへの接続に成功しました。');
     console.log(`テストメールを送信します: ${recipient}`);
 
+    // 送信元メールアドレスの設定
+    const SENDER_EMAIL = process.env.SENDER_EMAIL || 'info@mamo-tag.jp';
+    console.log(`送信元メールアドレス: ${SENDER_EMAIL}`);
+
     // テストメールの送信
     return transporter.sendMail({
-      from: `"おかえりNFC" <${EMAIL_USER}>`,
+      from: `"まもタグ" <${SENDER_EMAIL}>`,
       to: recipient,
-      subject: '【おかえりNFC】メール送信テスト',
+      subject: '【まもタグ】メール送信テスト',
       html: `
         <!DOCTYPE html>
         <html lang="ja">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>おかえりNFC - メール送信テスト</title>
+          <title>まもタグ - メール送信テスト</title>
           <style>
             body {
               font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', Meiryo, sans-serif;
@@ -91,7 +95,7 @@ transporter.verify()
               box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             }
             .header {
-              background-color: #8BC34A;
+              background-color: #2196F3;
               color: white;
               padding: 20px;
               text-align: center;
@@ -105,7 +109,7 @@ transporter.verify()
             }
             .notification-box {
               background-color: #f9f9f9;
-              border-left: 4px solid #8BC34A;
+              border-left: 4px solid #2196F3;
               padding: 15px;
               margin-bottom: 20px;
             }
@@ -124,13 +128,13 @@ transporter.verify()
         <body>
           <div class="container">
             <div class="header">
-              <h1>おかえりNFC</h1>
+              <h1>まもタグ</h1>
             </div>
             <div class="content">
               <h2>メール送信テスト</h2>
               
               <div class="notification-box">
-                <p>このメールは「おかえりNFC」のメール送信テストです。</p>
+                <p>このメールは「まもタグ」のメール送信テストです。</p>
                 <p>このメールが正常に届いた場合、メール送信機能は正常に動作しています。</p>
               </div>
               
@@ -144,7 +148,7 @@ transporter.verify()
             
             <div class="footer">
               <p>このメールは自動送信されています。返信はできません。</p>
-              <p>&copy; 2025 おかえりNFC. All rights reserved.</p>
+              <p>&copy; 2025 まもタグ. All rights reserved.</p>
             </div>
           </div>
         </body>

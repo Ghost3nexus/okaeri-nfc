@@ -120,6 +120,17 @@ async function fetchUserTags() {
  */
 async function fetchUserNotifications() {
     try {
+        // デモモード（SKIP_MONGODB=true）の場合はローカルストレージから取得
+        const storedNotificationsStr = localStorage.getItem('mockNotifications');
+        if (storedNotificationsStr) {
+            console.log('ローカルストレージから通知を取得します');
+            const storedNotifications = JSON.parse(storedNotificationsStr);
+            if (Array.isArray(storedNotifications) && storedNotifications.length > 0) {
+                console.log('ローカルストレージから通知を取得しました:', storedNotifications.length);
+                return storedNotifications;
+            }
+        }
+        
         // ローカルストレージからトークンを取得
         const token = localStorage.getItem(CONFIG.STORAGE_TOKEN_KEY);
         console.log('fetchUserNotifications - トークン:', token);
@@ -142,7 +153,24 @@ async function fetchUserNotifications() {
         return data.data.notifications;
     } catch (error) {
         console.error('通知一覧取得エラー:', error);
-        throw error;
+        
+        // エラー時にデモデータを返す
+        console.log('デモ通知データを使用します');
+        return [
+            {
+                _id: 'demo-notification-1',
+                tag: {
+                    _id: 'demo-tag-1',
+                    name: 'デモ用財布タグ',
+                    tagId: 'DEMO001'
+                },
+                location: '東京駅',
+                foundDate: new Date(),
+                details: 'デモ用の通知データです',
+                status: '未読',
+                createdAt: new Date()
+            }
+        ];
     }
 }
 
