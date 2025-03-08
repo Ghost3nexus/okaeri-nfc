@@ -118,21 +118,10 @@ ${message ? `\n■ 発見者からのメッセージ\n${message}` : ''}
         createdAt: new Date()
       };
       
-      // モックデータをローカルストレージに保存（デモモード用）
-      try {
-        // 既存の通知を取得
-        const storedNotificationsStr = localStorage.getItem('mockNotifications');
-        let storedNotifications = storedNotificationsStr ? JSON.parse(storedNotificationsStr) : [];
-        
-        // 新しい通知を追加
-        storedNotifications.unshift(mockNotification);
-        
-        // ローカルストレージに保存
-        localStorage.setItem('mockNotifications', JSON.stringify(storedNotifications));
-        console.log('モック通知をローカルストレージに保存しました');
-      } catch (storageErr) {
-        console.error('ローカルストレージ保存エラー:', storageErr);
-      }
+      // Node.jsサーバーではlocalStorageは使用できないため、
+      // モック通知はメモリ内またはファイルに保存する必要があります
+      // ここではシンプルにログ出力のみ行います
+      console.log('モック通知を作成しました:', mockNotification);
       
       // 成功レスポンスを返す
       return res.status(201).json({
@@ -206,7 +195,7 @@ ${message ? `\n■ 発見者からのメッセージ\n${message}` : ''}
             id: 'mock-notification-id',
             createdAt: new Date()
           },
-          mailtoLink: mailtoLink
+          emailSent: false
         }
       });
     }
