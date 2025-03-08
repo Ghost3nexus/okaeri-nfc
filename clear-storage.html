@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストレージクリア - まもタグ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        // ページ読み込み時にローカルストレージをクリア
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                // ローカルストレージをクリア
+                localStorage.clear();
+                
+                // 成功メッセージを表示
+                document.getElementById('successMessage').classList.remove('d-none');
+                document.getElementById('errorMessage').classList.add('d-none');
+                
+                // ローカルストレージの内容を表示
+                document.getElementById('storageContent').textContent = 'ローカルストレージは空です';
+            } catch (error) {
+                // エラーメッセージを表示
+                document.getElementById('successMessage').classList.add('d-none');
+                document.getElementById('errorMessage').classList.remove('d-none');
+                document.getElementById('errorDetails').textContent = error.message;
+            }
+        });
+    </script>
+</head>
+<body>
+    <header class="bg-primary-custom">
+        <div class="container py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="index.html" class="text-white text-decoration-none">
+                    <h1 class="h4 mb-0"><i class="fas fa-home me-2"></i>まもタグ</h1>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <h2 class="card-title h4 mb-4 text-center">ストレージクリア</h2>
+                            
+                            <div id="successMessage" class="alert alert-success d-none">
+                                <i class="fas fa-check-circle me-2"></i>
+                                ローカルストレージを正常にクリアしました。
+                            </div>
+                            
+                            <div id="errorMessage" class="alert alert-danger d-none">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                ローカルストレージのクリア中にエラーが発生しました。
+                                <div id="errorDetails" class="mt-2 small"></div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h5 class="h6">ローカルストレージの状態:</h5>
+                                <pre id="storageContent" class="bg-light p-3 rounded">読み込み中...</pre>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a href="login.html" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt me-2"></i>ログインページへ
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <h5>まもタグ</h5>
+                    <p class="text-muted">NFCタグを活用した落とし物発見サービス</p>
+                </div>
+                <div class="col-md-6">
+                    <h5>お問い合わせ</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li><i class="fas fa-envelope me-2"></i>info@mamo-tag.jp</li>
+                        <li><i class="fas fa-phone me-2"></i>03-1234-5678</li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center text-muted">
+                <small>&copy; 2025 まもタグ. All rights reserved.</small>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
