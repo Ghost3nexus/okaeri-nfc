@@ -3,12 +3,15 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // URLからトークンを取得
+    // URLからトークンとタグIDを取得
     const token = getUrlParam('token');
+    const tagId = getUrlParam('tagId');
+    
+    console.log('URLパラメータ - token:', token, 'tagId:', tagId);
     
     if (token) {
         // トークンがある場合は持ち主情報を取得
-        fetchOwnerInfo(token);
+        fetchOwnerInfo(token, tagId);
     } else {
         // トークンがない場合はエラー表示
         showError();
@@ -18,8 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
 /**
  * 持ち主情報を取得する
  * @param {string} token - サービストークン
+ * @param {string} tagId - タグID
  */
-async function fetchOwnerInfo(token) {
+async function fetchOwnerInfo(token, tagId) {
+    // グローバル変数に保存して、後で通知送信時に使用できるようにする
+    window.currentTagId = tagId || token; // tagIdがない場合はtokenを使用
     const userInfoElement = document.getElementById('userInfo');
     const loadingElement = document.getElementById('loadingInfo');
     const errorElement = document.getElementById('errorInfo');
@@ -137,8 +143,13 @@ function displayOwnerInfo(ownerData) {
                     let emailSent = false;
                     try {
                         const token = getUrlParam('token');
+                        const tagId = getUrlParam('tagId') || window.currentTagId || token;
+                        
+                        console.log('通知送信 - token:', token, 'tagId:', tagId);
+                        
                         const notificationData = {
-                            tagId: token,
+                            tagId: tagId, // タグIDを使用
+                            token: token, // トークンも送信
                             location: foundLocation,
                             foundDate: new Date().toISOString(),
                             details: `関係: ${relationship}`,

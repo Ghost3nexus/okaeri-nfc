@@ -35,6 +35,7 @@ router.post('/', async (req, res) => {
   try {
     const {
       tagId,
+      token,  // トークンパラメータを追加
       location,
       foundDate,
       details,
@@ -45,6 +46,7 @@ router.post('/', async (req, res) => {
 
     console.log('通知作成リクエスト受信:', {
       tagId,
+      token,  // ログにトークンも表示
       location,
       foundDate,
       details,
@@ -140,12 +142,35 @@ ${message ? `\n■ 発見者からのメッセージ\n${message}` : ''}
     // タグIDからタグ情報を取得
     let tag;
     try {
-      // タグIDがサービストークンの場合とタグIDの場合の両方に対応
+      // タグIDとトークンの両方を使用してタグを検索
+      const searchConditions = [];
+      
+      // tagIdが提供されている場合
+      if (tagId) {
+        searchConditions.push({ tagId: tagId });
+      }
+      
+      // tokenが提供されている場合
+      if (token) {
+        searchConditions.push({ serviceToken: token });
+        // tagIdがない場合はtokenをtagIdとしても検索
+        if (!tagId) {
+          searchConditions.push({ tagId: token });
+        }
+      }
+      
+      // どちらも提供されていない場合はエラー
+      if (searchConditions.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'タグIDまたはトークンが必要です'
+        });
+      }
+      
+      console.log('タグ検索条件:', searchConditions);
+      
       tag = await Tag.findOne({
-        $or: [
-          { tagId: tagId },
-          { serviceToken: tagId }
-        ]
+        $or: searchConditions
       }).populate({
         path: 'owner',
         select: 'name email phone'
